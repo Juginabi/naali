@@ -63,10 +63,6 @@ if (!isServer)
                     switch (me.Name())
                     {
                         // These attributes are hardcoded for portalScene.
-                    case "potal":
-                        client.Login("localhost", 2346,"lal", "pass", "udp");
-                        conName = "127.0.0.1-2346-udp";
-                        break;
                     case "camdisplaywall1":
                         client.Login("localhost", 2346,"lal", "pass", "udp");
                         conName = "127.0.0.1-2346-udp";
