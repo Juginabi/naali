@@ -100,22 +100,17 @@ if (!isServer)
                         client.Login("localhost", 2349,"lal", "pass", "udp");
                         conName = "127.0.0.1-2349-udp";
                         break;
-//                    case "camdisplaywall5":
-//                        client.Login("localhost", 2350,"lal", "pass", "udp");
-//                        conName = "127.0.0.1-2350-udp";
-//                        break;
-//                    case "camdisplaywall6":
-//                        client.Login("localhost", 2351,"lal", "pass", "udp");
-//                        conName = "127.0.0.1-2351-udp";
-//                        break;
                     }
                 }
             }
         }
     }
 
-    function handleCollision(ent)
+    function handleCollision(ent,position,normal,distance,impulse,newCollision)
     {
+        if (!newCollision)
+            return;
+
         var id = ent.id;
         // Accept only dices in the portal scene.
         if (id >= 12 && id <= 14 )
