@@ -21,6 +21,7 @@ if (!isServer)
     input.TopLevelInputContext().MouseLeftPressed.connect(mouseLeftPress);
     input.TopLevelInputContext().MouseRightPressed.connect(mouseRightPress);
     client.Disconnected.connect(clientDisconnected);
+    // This happens every frame so be carefull... overwhelming dices!
     me.rigidbody.PhysicsCollision.connect(handleCollision);
 
 
@@ -116,21 +117,25 @@ if (!isServer)
     function handleCollision(ent)
     {
         var id = ent.id;
+        // Accept only dices in the portal scene.
         if (id >= 12 && id <= 14 )
         {
             var placeable, mesh, name, rigidbody;
             var otherScene = framework.Scene().GetScene(conName);
             if (otherScene)
             {
-                //me.rigidbody.PhysicsCollision.disconnect(handleCollision);
+                // Create new entity to target scene.
                 var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody"]);
+                // Set placeable parameters. Random position.
                 var oldTransform = Entity.placeable.transform;
                 oldTransform.pos = new float3((Math.random()*35)+1,(Math.random()*35)+1,(Math.random()*35)+1);
                 Entity.placeable.transform = oldTransform;
+                // Set same material to new entity as in the entity dragged to portal
                 Entity.mesh.meshRef = ent.mesh.meshRef;
                 Entity.mesh.meshMaterial = ent.mesh.meshMaterial;
+                // Set same name also
                 Entity.name = ent.name;
-
+                // Set rigidbody size and mass.
                 var size = new float3(2,2,2);
                 Entity.rigidbody.mass = 10;
                 Entity.rigidbody.size = size;
@@ -142,6 +147,7 @@ if (!isServer)
     {
         if (id == conName)
         {
+            // Set portal to black color when inactive.
             conName = "";
             me.mesh.SetMaterial(1, "portalMaterial.100.material");
             me.mesh.meshRef = me.mesh.meshRef;
@@ -165,6 +171,7 @@ if (!isServer)
         var otherScene = framework.Scene().GetScene(conName);
         if (otherScene == null)
             return;
+        // Get avatar camera if it exists in the scene.
         var cam = otherScene.GetEntityByName("AvatarCamera");
         if (cam)
         {
@@ -175,11 +182,13 @@ if (!isServer)
         }
         else
         {
+            // If there was no avatar camerạ, then get freelook.
             cam = otherScene.GetEntityByName("FreeLookCamera");
             cam.GetOrCreateComponent("EC_RttTarget");
             rtt = cam.rtttarget;
             rtt.textureName = "FreeLookCamera_" + conName + "_tex";
         }
+        // Render to texture resolution
         rtt.size_x = 400;
         rtt.size_y = 300;
         rtt.PrepareRtt();
