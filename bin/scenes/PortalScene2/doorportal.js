@@ -116,23 +116,24 @@ if (!isServer)
     function handleCollision(ent)
     {
         var id = ent.id;
-        if (id >= 13 && id <= 15 )
+        if (id >= 12 && id <= 14 )
         {
             var placeable, mesh, name, rigidbody;
             var otherScene = framework.Scene().GetScene(conName);
             if (otherScene)
             {
                 //me.rigidbody.PhysicsCollision.disconnect(handleCollision);
-                var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name"]);
+                var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody"]);
+                var oldTransform = Entity.placeable.transform;
+                oldTransform.pos = new float3((Math.random()*35)+1,(Math.random()*35)+1,(Math.random()*35)+1);
+                Entity.placeable.transform = oldTransform;
                 Entity.mesh.meshRef = ent.mesh.meshRef;
                 Entity.mesh.meshMaterial = ent.mesh.meshMaterial;
-                Entity.placeable.transform.pos = ent.placeable.transform.pos;
                 Entity.name = ent.name;
-                Entity.GetOrCreateComponent("EC_Rigidbody");
+
                 var size = new float3(2,2,2);
                 Entity.rigidbody.mass = 10;
                 Entity.rigidbody.size = size;
-                print("Entity rigidbody mass: " + Entity.rigidbody.mass);
             }
         }
     }

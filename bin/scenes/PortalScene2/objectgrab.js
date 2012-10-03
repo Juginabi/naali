@@ -46,7 +46,7 @@ ObjectGrab.prototype.GetTargetedEntity = function(x, y)
 {
     var raycastResult = scene.ogre.Raycast(x, y, 0xffffffff);
     if(raycastResult.entity != null) {
-        if (raycastResult.entity.id >= 13 && raycastResult.entity.id <= 15)
+        if (raycastResult.entity.id >= 12 && raycastResult.entity.id <= 14)
             return raycastResult.entity.id;
         else
             return -1;
