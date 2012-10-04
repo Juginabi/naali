@@ -74,7 +74,7 @@ if (!isServer)
 
                 // Lets check if controlled avatar is inside arbitary range to initialize login procedure.
                 var distance = avatarPos.Distance(parentPos);
-                if (distance < 5)
+                if (distance < 8)
                 {
 
                     // This disconnect should be disabled if multiple simultaneous connections are wanted with multiconnection feature.a
@@ -115,15 +115,26 @@ if (!isServer)
         // Accept only dices in the portal scene.
         if (id >= 12 && id <= 14 )
         {
-            var placeable, mesh, name, rigidbody;
             var otherScene = framework.Scene().GetScene(conName);
             if (otherScene)
             {
+                var camera = null
+                if (!(camera = otherScene.GetEntityByName("AvatarCamera")))
+                {
+                    camera = otherScene.GetEntityByName("FreeLookCamera");
+                }
+
+                var camerapos = camera.placeable.WorldPosition();
+                var worldOrient = camera.placeable.WorldOrientation();
+                var suunta = worldOrient.Mul(otherScene.ForwardVector());
+                var uusSuunta = suunta.Mul(new float3(8, 8, 8));
+                var uusPaikka = uusSuunta.Add(camerapos);
+
                 // Create new entity to target scene.
-                var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody"]);
+                var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody", "EC_Sound"]);
                 // Set placeable parameters. Random position.
                 var oldTransform = Entity.placeable.transform;
-                oldTransform.pos = new float3((Math.random()*35)+1,(Math.random()*35)+1,(Math.random()*35)+1);
+                oldTransform.pos = uusPaikka;
                 Entity.placeable.transform = oldTransform;
                 // Set same material to new entity as in the entity dragged to portal
                 Entity.mesh.meshRef = ent.mesh.meshRef;
@@ -134,6 +145,14 @@ if (!isServer)
                 var size = new float3(2,2,2);
                 Entity.rigidbody.mass = 10;
                 Entity.rigidbody.size = size;
+                // Add pop sound
+                Entity.sound.soundRef = "http://chiru.cie.fi/PortalScene2/POP.WAV";
+                Entity.sound.soundOuterRadius = 1000;
+
+                // This is just for funzies.
+                var script = Entity.GetOrCreateComponent("EC_Script");
+                script.scriptRef = new AssetReference("http://chiru.cie.fi/PortalScene2/duplicate.js");
+                script.runOnLoad = true;
             }
         }
     }

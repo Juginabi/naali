@@ -11,6 +11,7 @@ function ObjectGrab(entity, comp)
     //this.originalPosition = new float3();
     //this.originalOrientation = new Quat();
     this.originalTransform = 0;
+    this.objectActive = false;
     this.animDirection = true;
 
     if(!server.IsRunning())
@@ -155,22 +156,45 @@ ObjectGrab.prototype.MoveSelectedObject = function(deltaX, deltaY)
 // <MOUSE HANDLERS>
 ObjectGrab.prototype.HandleMouseMove = function(event)
 {
-    if (event.IsLeftButtonDown())
-        this.MoveSelectedObject(event.relativeX, event.relativeY);
+    var entity = scene.EntityById(this.selectedId);
+    if (this.objectActive)
+    {
+        var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xffffffff);
+        if(raycastResult.entity != null)
+        {
+            if (raycastResult.entity.id > 1 && raycastResult.entity.id < 6)
+            {
+                var transform = entity.placeable.transform;
+                transform.pos = raycastResult.entity.placeable.transform.pos;
+                entity.placeable.transform = transform;
+            }
+        }
+
+        //this.MoveSelectedObject(event.relativeX, event.relativeY);
+    }
 }
 
 ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
 {
-    var entityId = this.GetTargetedEntity(event.x, event.y);
-    if(entityId == -1)
-        return;
+    if (!this.objectActive)
+    {
+        var entityId = this.GetTargetedEntity(event.x, event.y);
+        if(entityId == -1)
+            return;
+        this.SelectEntity(entityId);
+        this.objectActive = true;
+    }
+    else
+    {
+        this.ReleaseSelection(this.entityId);
+        this.objectActive = false;
+    }
 
-    this.SelectEntity(entityId);
 }
 
 ObjectGrab.prototype.HandleMouseLeftReleased = function(event)
 {
-    this.ReleaseSelection(this.entityId);
+    //this.ReleaseSelection(this.entityId);
 }
 // </MOUSE HANDLERS>
 
