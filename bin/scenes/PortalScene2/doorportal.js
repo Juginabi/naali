@@ -22,7 +22,7 @@ if (!isServer)
     input.TopLevelInputContext().MouseRightPressed.connect(mouseRightPress);
     client.Disconnected.connect(clientDisconnected);
     // This happens every frame so be carefull... overwhelming dices!
-    me.rigidbody.PhysicsCollision.connect(handleCollision);
+    me.Action("Collision").Triggered.connect(handleCollision);
 
 
     if (firstRun)
@@ -106,15 +106,9 @@ if (!isServer)
         }
     }
 
-    function handleCollision(ent,position,normal,distance,impulse,newCollision)
+    function handleCollision(entityID, sceneName, scale/*ent,position,normal,distance,impulse,newCollision*/)
     {
-        if (!newCollision)
-            return;
-
-        var id = ent.id;
-        // Accept only dices in the portal scene.
-        if (id >= 12 && id <= 14 )
-        {
+        var ent = framework.Scene().GetScene(sceneName).EntityById(entityID);
             var otherScene = framework.Scene().GetScene(conName);
             if (otherScene)
             {
@@ -135,6 +129,12 @@ if (!isServer)
                 // Set placeable parameters. Random position.
                 var oldTransform = Entity.placeable.transform;
                 oldTransform.pos = uusPaikka;
+                oldTransform.scale.x = scale;
+                print("Old: " + oldTransform.scale.x);
+                oldTransform.scale.y = scale;
+                print("Old: " + oldTransform.scale.y);
+                oldTransform.scale.z = scale;
+                print("Old: " + oldTransform.scale.z);
                 Entity.placeable.transform = oldTransform;
                 // Set same material to new entity as in the entity dragged to portal
                 Entity.mesh.meshRef = ent.mesh.meshRef;
@@ -150,11 +150,11 @@ if (!isServer)
                 Entity.sound.soundOuterRadius = 1000;
 
                 // This is just for funzies.
-                var script = Entity.GetOrCreateComponent("EC_Script");
-                script.scriptRef = new AssetReference("http://chiru.cie.fi/PortalScene2/duplicate.js");
-                script.runOnLoad = true;
+//                var script = Entity.GetOrCreateComponent("EC_Script");
+//                script.scriptRef = new AssetReference("http://chiru.cie.fi/PortalScene2/duplicate.js");
+//                script.runOnLoad = true;
             }
-        }
+//        }
     }
 
     function clientDisconnected(id)

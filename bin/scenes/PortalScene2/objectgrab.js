@@ -13,6 +13,7 @@ function ObjectGrab(entity, comp)
     this.originalTransform = 0;
     this.objectActive = false;
     this.animDirection = true;
+    this.targetPortal = 0;
 
     if(!server.IsRunning())
     {
@@ -73,8 +74,9 @@ ObjectGrab.prototype.SelectEntity = function(entityId)
         // Save the original orientation of the entity
         //this.originalOrientation = entity.placeable.WorldOrientation();
         //this.originalPosition = entity.placeable.transform.pos;
-        //this.originalTransform = entity.placeable.transform;
+        this.originalTransform = entity.placeable.transform;
         entity.rigidbody.mass = 0;
+        entity.rigidbody.phantom = true;
         this.selectedId = entityId;
     }
 }
@@ -89,8 +91,9 @@ ObjectGrab.prototype.ReleaseSelection = function()
         //var transform = entity.placeable.transform;
         //transform.pos = this.originalPosition;
         //entity.placeable.SetOrientation(this.originalOrientation);
-        //entity.placeable.transform = this.originalTransform;
+        entity.placeable.transform = this.originalTransform;
         entity.rigidbody.mass = 10;
+        entity.rigidbody.phantom = false;
         this.selectedId = -1;
     }
 }
@@ -126,7 +129,7 @@ ObjectGrab.prototype.MoveSelectedObject = function(deltaX, deltaY)
 
     var mainWindow = ui.MainWindow();
     var windowWidth = mainWindow.width;
-    var windowHeight = mainWindow.height;
+    var windowHeight = mainWindow.height;this.selectedId
 
     var movedX = deltaX * (1 / windowWidth);
     var movedY = deltaY * (1 / windowHeight);
@@ -164,9 +167,15 @@ ObjectGrab.prototype.HandleMouseMove = function(event)
         {
             if (raycastResult.entity.id > 1 && raycastResult.entity.id < 6)
             {
+                this.targetPortal = scene.EntityById(raycastResult.entity.id);
                 var transform = entity.placeable.transform;
                 transform.pos = raycastResult.entity.placeable.transform.pos;
                 entity.placeable.transform = transform;
+            }
+            else if (raycastResult.entity.id == 11)
+            {
+                this.targetPortal = 0;
+                entity.placeable.transform = this.originalTransform;
             }
         }
 
@@ -186,6 +195,12 @@ ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
     }
     else
     {
+        if (this.targetPortal)
+        {
+            var entity = scene.EntityById(this.selectedId);
+            var transform = entity.placeable.transform;
+            this.targetPortal.Exec(1, "Collision",this.selectedId, scene.name, transform.scale.x);
+        }
         this.ReleaseSelection(this.entityId);
         this.objectActive = false;
     }
