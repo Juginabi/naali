@@ -106,55 +106,51 @@ if (!isServer)
         }
     }
 
-    function handleCollision(entityID, sceneName, scale/*ent,position,normal,distance,impulse,newCollision*/)
+    function handleCollision(entityID, sceneName, scale)
     {
         var ent = framework.Scene().GetScene(sceneName).EntityById(entityID);
-            var otherScene = framework.Scene().GetScene(conName);
-            if (otherScene)
+        var otherScene = framework.Scene().GetScene(conName);
+        if (otherScene)
+        {
+            var camera = null
+            if (!(camera = otherScene.GetEntityByName("AvatarCamera")))
             {
-                var camera = null
-                if (!(camera = otherScene.GetEntityByName("AvatarCamera")))
-                {
-                    camera = otherScene.GetEntityByName("FreeLookCamera");
-                }
-
-                var camerapos = camera.placeable.WorldPosition();
-                var worldOrient = camera.placeable.WorldOrientation();
-                var suunta = worldOrient.Mul(otherScene.ForwardVector());
-                var uusSuunta = suunta.Mul(new float3(8, 8, 8));
-                var uusPaikka = uusSuunta.Add(camerapos);
-
-                // Create new entity to target scene.
-                var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody", "EC_Sound"]);
-                // Set placeable parameters. Random position.
-                var oldTransform = Entity.placeable.transform;
-                oldTransform.pos = uusPaikka;
-                oldTransform.scale.x = scale;
-                print("Old: " + oldTransform.scale.x);
-                oldTransform.scale.y = scale;
-                print("Old: " + oldTransform.scale.y);
-                oldTransform.scale.z = scale;
-                print("Old: " + oldTransform.scale.z);
-                Entity.placeable.transform = oldTransform;
-                // Set same material to new entity as in the entity dragged to portal
-                Entity.mesh.meshRef = ent.mesh.meshRef;
-                Entity.mesh.meshMaterial = ent.mesh.meshMaterial;
-                // Set same name also
-                Entity.name = ent.name;
-                // Set rigidbody size and mass.
-                var size = new float3(2,2,2);
-                Entity.rigidbody.mass = 10;
-                Entity.rigidbody.size = size;
-                // Add pop sound
-                Entity.sound.soundRef = "http://chiru.cie.fi/PortalScene2/POP.WAV";
-                Entity.sound.soundOuterRadius = 1000;
-
-                // This is just for funzies.
-//                var script = Entity.GetOrCreateComponent("EC_Script");
-//                script.scriptRef = new AssetReference("http://chiru.cie.fi/PortalScene2/duplicate.js");
-//                script.runOnLoad = true;
+                camera = otherScene.GetEntityByName("FreeLookCamera");
             }
-//        }
+
+            var camerapos = camera.placeable.WorldPosition();
+            var worldOrient = camera.placeable.WorldOrientation();
+            var suunta = worldOrient.Mul(otherScene.ForwardVector());
+            var uusSuunta = suunta.Mul(new float3(8, 8, 8));
+            var uusPaikka = uusSuunta.Add(camerapos);
+
+            // Create new entity to target scene.
+            var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody", "EC_Sound"]);
+            // Set placeable parameters. Random position.
+            var oldTransform = Entity.placeable.transform;
+            oldTransform.pos = uusPaikka;
+            oldTransform.scale.x = scale;
+            oldTransform.scale.y = scale;
+            oldTransform.scale.z = scale;
+            Entity.placeable.transform = oldTransform;
+            // Set same material to new entity as in the entity dragged to portal
+            Entity.mesh.meshRef = ent.mesh.meshRef;
+            Entity.mesh.meshMaterial = ent.mesh.meshMaterial;
+            // Set same name also
+            Entity.name = ent.name;
+            // Set rigidbody size and mass.
+            var size = new float3(2,2,2);
+            Entity.rigidbody.mass = 10;
+            Entity.rigidbody.size = size;
+            // Add pop sound
+            Entity.sound.soundRef = "http://chiru.cie.fi/PortalScene2/POP.WAV";
+            Entity.sound.soundOuterRadius = 1000;
+
+            // This is just for funzies.
+            //                var script = Entity.GetOrCreateComponent("EC_Script");
+            //                script.scriptRef = new AssetReference("http://chiru.cie.fi/PortalScene2/duplicate.js");
+            //                script.runOnLoad = true;
+        }
     }
 
     function clientDisconnected(id)
@@ -178,6 +174,12 @@ if (!isServer)
     function newConnection(replyData)
     {
         frame.DelayedExecute(1).Triggered.connect(this, init); //XXX dirty hack
+        frame.DelayedExecute(1/30).Triggered.connect(this, switchBack); // Switch view immediately back to portal scene when connection to other scene happens
+    }
+
+    function switchBack()
+    {
+        client.emitSceneSwitch(scene.name);
     }
 
     function init()
@@ -217,7 +219,7 @@ if (!isServer)
     {
         if (rtt != null)
         {
-            //print("Entity: " + entity.Name() + " has entered the view.");
+            print("Entity: " + entity.Name() + " has entered the view.");
             rtt.SetAutoUpdate(true);
         }
     }
@@ -226,7 +228,7 @@ if (!isServer)
     {
         if (rtt != null)
         {
-            //print("Entity: " + entity.Name() + " has left the view.");
+            print("Entity: " + entity.Name() + " has left the view.");
             rtt.SetAutoUpdate(false);
         }
     }

@@ -420,7 +420,7 @@
    <attribute value="" name="description"/>
   </component>
   <component type="EC_Placeable" sync="true">
-   <attribute value="0.405085,0.659273,-10.437769,-0.101535,53.138710,-0.123146,0.709144,0.709144,0.709144" name="Transform"/>
+   <attribute value="-0.410085,0.71273,2.037769,-0.101535,53.138710,-0.123146,0.709144,0.709144,0.709144" name="Transform"/>
    <attribute value="false" name="Show bounding box"/>
    <attribute value="true" name="Visible"/>
    <attribute value="1" name="Selection layer"/>
@@ -462,7 +462,7 @@
    <attribute value="" name="description"/>
   </component>
   <component type="EC_Placeable" sync="true">
-   <attribute value="5.916702,0.502960,-1.420918,0.000020,-38.758854,0.000035,0.502960,0.502960,0.502960" name="Transform"/>
+   <attribute value="0.6,0.512960,0.56,0.000020,-38.758854,0.000035,0.502960,0.502960,0.502960" name="Transform"/>
    <attribute value="false" name="Show bounding box"/>
    <attribute value="true" name="Visible"/>
    <attribute value="1" name="Selection layer"/>
@@ -504,7 +504,7 @@
    <attribute value="" name="description"/>
   </component>
   <component type="EC_Placeable" sync="true">
-   <attribute value="-6.662901,0.611861,1.364268,-0.000012,-29.690916,0.000005,0.611914,0.611861,0.611914" name="Transform"/>
+   <attribute value="1.48,0.611861,2.2324268,-0.000012,-29.690916,0.000005,0.611914,0.611861,0.611914" name="Transform"/>
    <attribute value="false" name="Show bounding box"/>
    <attribute value="true" name="Visible"/>
    <attribute value="1" name="Selection layer"/>
