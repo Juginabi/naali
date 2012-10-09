@@ -34,10 +34,16 @@ if (!isServer)
     function initialize()
     {
         var camera_ent = scene.GetEntityByName("FreeLookCamera");
-        var cam = camera_ent.camera;
-        cam.StartViewTracking(me);
-        cam.EntityEnterView.connect(enterView);
-        cam.EntityLeaveView.connect(leaveView);
+        if (camera_ent)
+        {
+            var cam = camera_ent.camera;
+            if (cam)
+            {
+                cam.StartViewTracking(me);
+                cam.EntityEnterView.connect(enterView);
+                cam.EntityLeaveView.connect(leaveView);
+            }
+        }
     }
 
     function mouseRightPress(event)
@@ -47,7 +53,7 @@ if (!isServer)
         if(raycastResult.entity != null)
         {
             // Check if clicked entity was parentEntity for this script
-            if (raycastResult.entity == parentEntity)
+            if (parentEntity && raycastResult.entity == parentEntity)
             {
                 if (conName != "")
                 {
@@ -64,43 +70,53 @@ if (!isServer)
         if(raycastResult.entity != null)
         {
             // Check if clicked entity was parentEntity for this script
-            if (raycastResult.entity == parentEntity)
+            if (parentEntity && raycastResult.entity == parentEntity)
             {
                 // This should be changed according to the scene. If no avatar present then this is void.
                 //var avatar = scene.GetEntityByName("Avatar" + client.GetConnectionID());
                 var camera = scene.GetEntityByName("FreeLookCamera");
-                var avatarPos = camera.placeable.transform.pos;
-                var parentPos = parentEntity.placeable.transform.pos;
-
-                // Lets check if controlled avatar is inside arbitary range to initialize login procedure.
-                var distance = avatarPos.Distance(parentPos);
-                if (distance < 8)
+                if (camera)
                 {
 
-                    // This disconnect should be disabled if multiple simultaneous connections are wanted with multiconnection feature.a
-                    //console.ExecuteCommand("Disconnect()");
-                    client.Connected.connect(newConnection);
-                    client.switchScene.connect(sceneSwitch);
-                    switch (me.Name())
+                    var cameraPos = camera.placeable.transform.pos;
+                    var parentPos = parentEntity.placeable.transform.pos;
+                    if (!cameraPos || !parentPos)
+                        return;
+
+                    // Lets check if controlled avatar is inside arbitary range to initialize login procedure.
+                    var distance = cameraPos.Distance(parentPos);
+                    if (distance  && distance < 20)
                     {
-                        // These attributes are hardcoded for portalScene.
-                    case "camdisplaywall1":
-                        client.Login("localhost", 2346,"lal", "pass", "udp");
-                        conName = "127.0.0.1-2346-udp";
-                        break;
-                    case "camdisplaywall2":
-                        client.Login("localhost", 2347,"lal", "pass", "udp");
-                        conName = "127.0.0.1-2347-udp";
-                        break;
-                    case "camdisplaywall3":
-                        client.Login("localhost", 2348,"lal", "pass", "udp");
-                        conName = "127.0.0.1-2348-udp";
-                        break;
-                    case "camdisplaywall4":
-                        client.Login("localhost", 2349,"lal", "pass", "udp");
-                        conName = "127.0.0.1-2349-udp";
-                        break;
+
+                        // This disconnect should be disabled if multiple simultaneous connections are wanted with multiconnection feature.a
+                        //console.ExecuteCommand("Disconnect()");
+                        client.Connected.connect(newConnection);
+                        client.switchScene.connect(sceneSwitch);
+                        switch (me.Name())
+                        {
+                            // These attributes are hardcoded for portalScene.
+                        case "camdisplaywall1":
+                            client.Login("localhost", 2346,"lal", "pass", "udp");
+                            conName = "127.0.0.1-2346-udp";
+                            break;
+                        case "camdisplaywall2":
+                            client.Login("localhost", 2347,"lal", "pass", "udp");
+                            conName = "127.0.0.1-2347-udp";
+                            break;
+                        case "camdisplaywall3":
+                            client.Login("localhost", 2348,"lal", "pass", "udp");
+                            conName = "127.0.0.1-2348-udp";
+                            break;
+                        case "camdisplaywall4":
+                            client.Login("localhost", 2349,"lal", "pass", "udp");
+                            conName = "127.0.0.1-2349-udp";
+                            break;
+                        }
                     }
+                }
+                else
+                {
+                    print("No camera found. No connection made from portal.\n");
                 }
             }
         }
@@ -109,47 +125,61 @@ if (!isServer)
     function handleCollision(entityID, sceneName, scale)
     {
         var ent = framework.Scene().GetScene(sceneName).EntityById(entityID);
-        var otherScene = framework.Scene().GetScene(conName);
-        if (otherScene)
+        if (ent)
         {
-            var camera = null
-            if (!(camera = otherScene.GetEntityByName("AvatarCamera")))
+            var otherScene = framework.Scene().GetScene(conName);
+            if (otherScene)
             {
-                camera = otherScene.GetEntityByName("FreeLookCamera");
+                var camera = null;
+                if (!(camera = otherScene.GetEntityByName("AvatarCamera")))
+                {
+                    if (!(camera = otherScene.GetEntityByName("FreeLookCamera")))
+                    {
+                        print("No camera found from target scene. Unable to copy entity.")
+                        return;
+                    }
+                }
+
+                var camerapos = camera.placeable.WorldPosition();
+                var worldOrient = camera.placeable.WorldOrientation();
+                var suunta = worldOrient.Mul(otherScene.ForwardVector());
+                var uusSuunta = suunta.Mul(new float3(8, 8, 8));
+                var uusPaikka = uusSuunta.Add(camerapos);
+
+                // Create new entity to target scene.
+                var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody", "EC_Sound"]);
+                if (Entity)
+                {
+
+                    // Set placeable parameters. Random position.
+                    var oldTransform = Entity.placeable.transform;
+                    oldTransform.pos = uusPaikka;
+                    oldTransform.scale.x = scale;
+                    oldTransform.scale.y = scale;
+                    oldTransform.scale.z = scale;
+                    Entity.placeable.transform = oldTransform;
+
+                    // Set same material to new entity as in the entity dragged to portal
+                    Entity.mesh.meshRef = ent.mesh.meshRef;
+                    Entity.mesh.meshMaterial = ent.mesh.meshMaterial;
+
+                    // Set same name also
+                    Entity.name = ent.name;
+                    // Set rigidbody size and mass.
+                    var size = new float3(2,2,2);
+                    Entity.rigidbody.mass = 10;
+                    Entity.rigidbody.size = size;
+
+//                    // Add pop sound
+//                    Entity.sound.soundRef = "http://chiru.cie.fi/PortalScene2/POP.WAV";
+//                    Entity.sound.soundOuterRadius = 1000;
+
+//                     This is just for funzies.
+//                                    var script = Entity.GetOrCreateComponent("EC_Script");
+//                                    script.scriptRef = new AssetReference("http://chiru.cie.fi/PortalScene2/duplicate.js");
+//                                    script.runOnLoad = true;
+                }
             }
-
-            var camerapos = camera.placeable.WorldPosition();
-            var worldOrient = camera.placeable.WorldOrientation();
-            var suunta = worldOrient.Mul(otherScene.ForwardVector());
-            var uusSuunta = suunta.Mul(new float3(8, 8, 8));
-            var uusPaikka = uusSuunta.Add(camerapos);
-
-            // Create new entity to target scene.
-            var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody", "EC_Sound"]);
-            // Set placeable parameters. Random position.
-            var oldTransform = Entity.placeable.transform;
-            oldTransform.pos = uusPaikka;
-            oldTransform.scale.x = scale;
-            oldTransform.scale.y = scale;
-            oldTransform.scale.z = scale;
-            Entity.placeable.transform = oldTransform;
-            // Set same material to new entity as in the entity dragged to portal
-            Entity.mesh.meshRef = ent.mesh.meshRef;
-            Entity.mesh.meshMaterial = ent.mesh.meshMaterial;
-            // Set same name also
-            Entity.name = ent.name;
-            // Set rigidbody size and mass.
-            var size = new float3(2,2,2);
-            Entity.rigidbody.mass = 10;
-            Entity.rigidbody.size = size;
-            // Add pop sound
-            Entity.sound.soundRef = "http://chiru.cie.fi/PortalScene2/POP.WAV";
-            Entity.sound.soundOuterRadius = 1000;
-
-            // This is just for funzies.
-            //                var script = Entity.GetOrCreateComponent("EC_Script");
-            //                script.scriptRef = new AssetReference("http://chiru.cie.fi/PortalScene2/duplicate.js");
-            //                script.runOnLoad = true;
         }
     }
 
@@ -174,13 +204,13 @@ if (!isServer)
     function newConnection(replyData)
     {
         frame.DelayedExecute(1).Triggered.connect(this, init); //XXX dirty hack
-        frame.DelayedExecute(1/30).Triggered.connect(this, switchBack); // Switch view immediately back to portal scene when connection to other scene happens
+//        frame.DelayedExecute(1).Triggered.connect(this, switchBack); // Switch view immediately back to portal scene when connection to other scene happens
     }
 
-    function switchBack()
-    {
-        client.emitSceneSwitch(scene.name);
-    }
+//    function switchBack()
+//    {
+//        client.emitSceneSwitch(scene.name);
+//    }
 
     function init()
     {
@@ -213,13 +243,14 @@ if (!isServer)
         me.mesh.SetMaterial(1, matname);
         client.switchScene.disconnect(sceneSwitch);
         client.Connected.disconnect(newConnection);
+        client.emitSceneSwitch(scene.name);
     }
 
     function enterView(entity)
     {
         if (rtt != null)
         {
-            print("Entity: " + entity.Name() + " has entered the view.");
+            //print("Entity: " + entity.Name() + " has entered the view.");
             rtt.SetAutoUpdate(true);
         }
     }
@@ -228,7 +259,7 @@ if (!isServer)
     {
         if (rtt != null)
         {
-            print("Entity: " + entity.Name() + " has left the view.");
+            //print("Entity: " + entity.Name() + " has left the view.");
             rtt.SetAutoUpdate(false);
         }
     }

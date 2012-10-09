@@ -147,7 +147,7 @@ ObjectGrab.prototype.MoveSelectedObject = function(deltaX, deltaY)
 
     var amountX = width * movedX * moveFactor;
     var amountY = height * movedY * moveFactor;
-
+scene
     var newPosition = selectedPosition.Add(cameraEntity.placeable.WorldOrientation().Mul(
         new float3(amountX, -amountY, 0)));
 
