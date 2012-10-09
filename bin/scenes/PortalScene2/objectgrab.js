@@ -193,23 +193,19 @@ ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
         this.SelectEntity(entityId);
         this.objectActive = true;
     }
-    else
-    {
-        if (this.targetPortal)
-        {
-            var entity = scene.EntityById(this.selectedId);
-            var transform = entity.placeable.transform;
-            this.targetPortal.Exec(1, "Collision",this.selectedId, scene.name, transform.scale.x);
-        }
-        this.ReleaseSelection(this.entityId);
-        this.objectActive = false;
-    }
-
 }
 
 ObjectGrab.prototype.HandleMouseLeftReleased = function(event)
 {
-    //this.ReleaseSelection(this.entityId);
+    if (this.targetPortal)
+    {
+        var entity = scene.EntityById(this.selectedId);
+        var transform = entity.placeable.transform;
+        this.targetPortal.Exec(1, "Collision",this.selectedId, scene.name, transform.scale.x);
+    }
+    this.ReleaseSelection(this.entityId);
+    this.targetPortal = null;
+    this.objectActive = false;
 }
 // </MOUSE HANDLERS>
 
