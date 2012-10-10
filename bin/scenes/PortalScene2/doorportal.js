@@ -116,7 +116,7 @@ if (!isServer)
                 }
                 else
                 {
-                    print("No camera found. No connection made from portal.\n");
+                    print("No camera found or too far. No connection made from portal.\n");
                 }
             }
         }
@@ -140,6 +140,7 @@ if (!isServer)
                     }
                 }
 
+                // Calculate position in front of the active scene camera.
                 var camerapos = camera.placeable.WorldPosition();
                 var worldOrient = camera.placeable.WorldOrientation();
                 var suunta = worldOrient.Mul(otherScene.ForwardVector());
@@ -150,7 +151,6 @@ if (!isServer)
                 var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody", "EC_Sound"]);
                 if (Entity)
                 {
-
                     // Set placeable parameters. Random position.
                     var oldTransform = Entity.placeable.transform;
                     oldTransform.pos = uusPaikka;
@@ -189,6 +189,7 @@ if (!isServer)
         {
             // Set portal to black color when inactive.
             conName = "";
+            rtt = null;
             me.mesh.SetMaterial(1, "portalMaterial.100.material");
             me.mesh.meshRef = me.mesh.meshRef;
         }
@@ -201,16 +202,10 @@ if (!isServer)
         client.Connected.disconnect(newConnection);
     }
 
-    function newConnection(replyData)
+    function newConnection()
     {
         frame.DelayedExecute(1).Triggered.connect(this, init); //XXX dirty hack
-//        frame.DelayedExecute(1).Triggered.connect(this, switchBack); // Switch view immediately back to portal scene when connection to other scene happens
     }
-
-//    function switchBack()
-//    {
-//        client.emitSceneSwitch(scene.name);
-//    }
 
     function init()
     {
