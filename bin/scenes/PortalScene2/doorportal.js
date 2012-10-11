@@ -92,24 +92,25 @@ if (!isServer)
                         //console.ExecuteCommand("Disconnect()");
                         client.Connected.connect(newConnection);
                         client.switchScene.connect(sceneSwitch);
+                        var ip = "130.231.12.112";
                         switch (me.Name())
                         {
                             // These attributes are hardcoded for portalScene.
                         case "camdisplaywall1":
-                            client.Login("localhost", 2346,"lal", "pass", "udp");
-                            conName = "127.0.0.1-2346-udp";
+                            client.Login(ip, 2346,"lal", "pass", "udp");
+                            conName = ip + "-2346-udp";
                             break;
                         case "camdisplaywall2":
-                            client.Login("localhost", 2347,"lal", "pass", "udp");
-                            conName = "127.0.0.1-2347-udp";
+                            client.Login(ip, 2347,"lal", "pass", "udp");
+                            conName = ip + "-2347-udp";
                             break;
                         case "camdisplaywall3":
-                            client.Login("localhost", 2348,"lal", "pass", "udp");
-                            conName = "127.0.0.1-2348-udp";
+                            client.Login(ip, 2348,"lal", "pass", "udp");
+                            conName = ip + "-2348-udp";
                             break;
                         case "camdisplaywall4":
-                            client.Login("localhost", 2349,"lal", "pass", "udp");
-                            conName = "127.0.0.1-2349-udp";
+                            client.Login(ip, 2349,"lal", "pass", "udp");
+                            conName = ip + "-2349-udp";
                             break;
                         }
                     }
