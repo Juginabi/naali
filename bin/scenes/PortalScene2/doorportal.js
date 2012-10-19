@@ -13,6 +13,7 @@ if (!isServer)
     //to track display entity visibility to disable rtt tex update
     var rtt = null; //the current rtt target image used. what happens when it is removed? clean js execption?
     var conName = "";
+    var freelookcameraPlaceable = null;
 
     var parentEntity = this.me;
     if (!parentEntity)
@@ -23,6 +24,7 @@ if (!isServer)
     client.Disconnected.connect(clientDisconnected);
     // This happens every frame so be carefull... overwhelming dices!
     me.Action("Collision").Triggered.connect(handleCollision);
+    me.Action("makeConnection").Triggered.connect(makeConnection);
 
 
     if (firstRun)
@@ -36,6 +38,7 @@ if (!isServer)
         var camera_ent = scene.GetEntityByName("FreeLookCamera");
         if (camera_ent)
         {
+            freelookcameraPlaceable = camera_ent.placeable;
             var cam = camera_ent.camera;
             if (cam)
             {
@@ -77,6 +80,7 @@ if (!isServer)
                 var camera = scene.GetEntityByName("FreeLookCamera");
                 if (camera)
                 {
+                    //frame.Updated.connect(this, moveCamera);
 
                     var cameraPos = camera.placeable.transform.pos;
                     var parentPos = parentEntity.placeable.transform.pos;
@@ -123,6 +127,42 @@ if (!isServer)
         }
     }
 
+    function makeConnection()
+    {
+        // This disconnect should be disabled if multiple simultaneous connections are wanted with multiconnection feature.a
+        //console.ExecuteCommand("Disconnect()");
+        client.Connected.connect(newConnection);
+        client.switchScene.connect(sceneSwitch);
+//        var ip = "130.231.12.112";
+//        switch (me.Name())
+//        {
+//            // These attributes are hardcoded for portalScene.
+//        case "camdisplaywall1":
+//            client.Login(ip, 2346,"lal", "pass", "udp");
+//            conName = ip + "-2346-udp";
+//            break;
+//        case "camdisplaywall2":
+//            client.Login(ip, 2347,"lal", "pass", "udp");
+//            conName = ip + "-2347-udp";
+//            break;
+//        case "camdisplaywall3":
+//            client.Login(ip, 2348,"lal", "pass", "udp");
+//            conName = ip + "-2348-udp";
+//            break;
+//        case "camdisplaywall4":
+//            client.Login(ip, 2349,"lal", "pass", "udp");
+//            conName = ip + "-2349-udp";
+//            break;
+//        }
+//        var camera_ent = scene.GetEntityByName("FreeLookCamera");
+//        var cameraPlace = camera_ent.placeable.transform;
+//        //cameraPlace.pos = float3(0,6.29,-7.54);
+//        cameraPlace.pos.x = 0;
+//        cameraPlace.pos.y = 6.29;
+//        cameraPlace.pos.z = -7.54;
+//        camera_ent.placeable.transform = cameraPlace;
+    }
+
     function handleCollision(entityID, sceneName, scale)
     {
         var ent = framework.Scene().GetScene(sceneName).EntityById(entityID);
@@ -145,8 +185,9 @@ if (!isServer)
                 var camerapos = camera.placeable.WorldPosition();
                 var worldOrient = camera.placeable.WorldOrientation();
                 var suunta = worldOrient.Mul(otherScene.ForwardVector());
-                var uusSuunta = suunta.Mul(new float3(8, 8, 8));
+                var uusSuunta = suunta.Mul(8);
                 var uusPaikka = uusSuunta.Add(camerapos);
+                uusPaikka.y += Math.random()*3;
 
                 // Create new entity to target scene.
                 var Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Placeable", "EC_Mesh", "EC_Name", "EC_Rigidbody", "EC_Sound"]);
@@ -171,14 +212,14 @@ if (!isServer)
                     Entity.rigidbody.mass = 10;
                     Entity.rigidbody.size = size;
 
-//                    // Add pop sound
-//                    Entity.sound.soundRef = "http://chiru.cie.fi/PortalScene2/POP.WAV";
-//                    Entity.sound.soundOuterRadius = 1000;
+                    // Add pop sound
+                    //Entity.sound.soundRef = "http://chiru.cie.fi/PortalScene2/POP.WAV";
+                    //Entity.sound.soundOuterRadius = 1000;
 
-//                     This is just for funzies.
-//                                    var script = Entity.GetOrCreateComponent("EC_Script");
-//                                    script.scriptRef = new AssetReference("http://chiru.cie.fi/PortalScene2/duplicate.js");
-//                                    script.runOnLoad = true;
+                    //This is just for funzies.
+                    //var script = Entity.GetOrCreateComponent("EC_Script");
+                    //script.scriptRef = new AssetReference("http://chiru.cie.fi/PortalScene2/duplicate.js");
+                    //script.runOnLoad = true;
                 }
             }
         }
@@ -194,7 +235,6 @@ if (!isServer)
             me.mesh.SetMaterial(1, "portalMaterial.100.material");
             me.mesh.meshRef = me.mesh.meshRef;
         }
-
     }
 
     function sceneSwitch(name)
@@ -206,6 +246,29 @@ if (!isServer)
     function newConnection()
     {
         frame.DelayedExecute(1).Triggered.connect(this, init); //XXX dirty hack
+        //wframe.Updated.connect(this, moveCamera);
+    }
+
+    function moveCamera()
+    {
+        // testcode
+        var cameraEntity = scene.GetEntityByName("FreeLookCamera");
+        var cameraTransform = cameraEntity.placeable.transform;
+        var myTransform = me.placeable.transform;
+        var moveVector = myTransform.pos.Sub(cameraTransform.pos);
+        if (moveVector.LengthSq() < 4)
+        {
+            frame.Updated.disconnect(this, moveCamera);
+            me.Exec(1, "makeConnection");
+            return;
+        }
+        var suunta = moveVector.Normalized();
+
+        cameraTransform.pos.x += suunta.x*0.5;
+        cameraTransform.pos.y += suunta.y*0.5;
+        cameraTransform.pos.z += suunta.z*0.5;
+
+        cameraEntity.placeable.transform = cameraTransform;
     }
 
     function init()
@@ -239,7 +302,7 @@ if (!isServer)
         me.mesh.SetMaterial(1, matname);
         client.switchScene.disconnect(sceneSwitch);
         client.Connected.disconnect(newConnection);
-        client.emitSceneSwitch(scene.name);
+        //client.emitSceneSwitch(scene.name);
     }
 
     function enterView(entity)

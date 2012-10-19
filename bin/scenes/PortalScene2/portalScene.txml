@@ -1,6 +1,6 @@
 <!DOCTYPE Scene>
 <scene>
-<entity id="1234" sync="1">
+<entity id="1" sync="1">
  <component type="EC_Script" sync="1">
   <attribute value="objectgrab.js" name="Script ref"/>
   <attribute value="true" name="Run on load"/>
@@ -13,7 +13,7 @@
   <attribute value="" name="description"/>
  </component>
 </entity>
-<entity id="21" sync="1">
+<entity id="2" sync="1">
 <component type="EC_Placeable" sync="true">
    <attribute value="5.513641,2,6.904410,90.000000,0.000000,180.000000,1.80,0.20,4.5" name="Transform"/>
    <attribute value="false" name="Show bounding box"/>
@@ -61,7 +61,7 @@
    <attribute value="" name="Script class name"/>
   </component>
  </entity>
- <entity id="22" sync="1">
+ <entity id="3" sync="1">
  <component type="EC_Placeable" sync="true">
     <attribute value="1.82,2,6.904410,90.000000,0.000000,180.000000,1.80,0.20,4.5" name="Transform"/>
     <attribute value="false" name="Show bounding box"/>
@@ -109,7 +109,7 @@
    <attribute value="" name="Script class name"/>
   </component>
  </entity>
- <entity id="23" sync="1">
+ <entity id="4" sync="1">
  <component type="EC_Placeable" sync="true">
     <attribute value="-1.84,2,6.904410,90.000000,0.000000,180.000000,1.80,0.20,4.5" name="Transform"/>
     <attribute value="false" name="Show bounding box"/>
@@ -157,7 +157,7 @@
    <attribute value="" name="Script class name"/>
   </component>
  </entity>
- <entity id="24" sync="1">
+ <entity id="5" sync="1">
  <component type="EC_Placeable" sync="true">
     <attribute value="-5.53,2,6.904410,90.000000,0.000000,180.000000,1.80,0.20,4.5" name="Transform"/>
     <attribute value="false" name="Show bounding box"/>
@@ -205,7 +205,7 @@
    <attribute value="" name="Script class name"/>
   </component>
  </entity>
- <entity id="114" sync="1">
+ <entity id="6" sync="1">
  <component type="EC_Name" sync="1">
   <attribute value="FreeLookCameraSpawnPos" name="name"/>
   <attribute value="" name="description"/>
@@ -213,13 +213,13 @@
  <component type="EC_Placeable" sync="1">
   <attribute value="1" name="Selection layer"/>
   <attribute value="" name="Parent bone name"/>
-  <attribute value="0,9.59,-19.06,-22.80,-178.80,0,1,1,1" name="Transform"/>
+  <attribute value="0,6.29,-7.54,-22.80,-178.80,0,1,1,1" name="Transform"/>
   <attribute value="false" name="Show bounding box"/>
   <attribute value="true" name="Visible"/>
   <attribute value="" name="Parent entity ref"/>
  </component>
  </entity>
- <entity id="3" sync="1">
+ <entity id="7" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="BackWall" name="name"/>
    <attribute value="" name="description"/>
@@ -261,7 +261,7 @@
    <attribute value="-1" name="Collision Mask"/>
   </component>
  </entity>
- <entity id="4" sync="1">
+ <entity id="8" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="RightWall" name="name"/>
    <attribute value="" name="description"/>
@@ -303,7 +303,7 @@
    <attribute value="-1" name="Collision Mask"/>
   </component>
  </entity>
- <entity id="5" sync="1">
+ <entity id="9" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="LeftWall" name="name"/>
    <attribute value="" name="description"/>
@@ -345,7 +345,7 @@
    <attribute value="-1" name="Collision Mask"/>
   </component>
  </entity>
- <entity id="6" sync="1">
+ <entity id="10" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="Lamp" name="name"/>
    <attribute value="" name="description"/>
@@ -372,7 +372,7 @@
    <attribute value="40" name="light outer angle"/>
   </component>
  </entity>
- <entity id="7" sync="1">
+ <entity id="11" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="Floor" name="name"/>
    <attribute value="" name="description"/>
@@ -414,7 +414,7 @@
    <attribute value="-1" name="Collision Mask"/>
   </component>
  </entity>
- <entity id="14" sync="1">
+ <entity id="12" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="BigDice" name="name"/>
    <attribute value="" name="description"/>
@@ -456,7 +456,7 @@
    <attribute value="-1" name="Collision Mask"/>
   </component>
  </entity>
- <entity id="15" sync="1">
+ <entity id="13" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="SmallDice" name="name"/>
    <attribute value="" name="description"/>
@@ -498,7 +498,7 @@
    <attribute value="-1" name="Collision Mask"/>
   </component>
  </entity>
- <entity id="16" sync="1">
+ <entity id="14" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="MidDice" name="name"/>
    <attribute value="" name="description"/>
@@ -540,7 +540,7 @@
    <attribute value="-1" name="Collision Mask"/>
   </component>
  </entity>
- <entity id="17" sync="1">
+ <entity id="15" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="Terrain" name="name"/>
    <attribute value="" name="description"/>
@@ -575,7 +575,7 @@
    <attribute value="-1" name="Collision Mask"/>
   </component>
  </entity>
- <entity id="18" sync="1">
+ <entity id="16" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="Sky" name="name"/>
    <attribute value="" name="description"/>
@@ -588,7 +588,7 @@
    <attribute value="true" name="Draw first"/>
   </component>
  </entity>
- <entity id="19" sync="1">
+ <entity id="17" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="Room light" name="name"/>
    <attribute value="" name="description"/>
