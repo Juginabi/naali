@@ -16,7 +16,6 @@ function ObjectGrab(entity, comp)
     this.animDirection = true;
     this.targetPortal = 0;
     this.ctrlDown = false;
-    this.hoveringText = null;
     this.timer = new QTimer();
 
     if(!server.IsRunning())
@@ -177,24 +176,7 @@ ObjectGrab.prototype.HandleMouseMove = function(event)
         if (raycastResult.entity && raycastResult.entity.id > 1 && raycastResult.entity.id < 6)
         {
             // Set pointed portal as target portal.
-            if (this.targetPortal)
-            {
-                this.hoveringText = this.targetPortal.GetOrCreateComponent("EC_HoveringText");
-                this.hoveringText.Hide();
-            }
-
             this.targetPortal = scene.EntityById(raycastResult.entity.id);
-            this.hoveringText = this.targetPortal.GetOrCreateComponent("EC_HoveringText");
-            this.hoveringText.backgroundColor = new Color(0.2, 0.2, 0.2, 0.2);
-            this.hoveringText.fontColor = new Color(1, 1, 1, 1);
-            var pos = this.hoveringText.position;
-            pos.x = 0;
-            pos.y = -1;
-            pos.z = 0.5;
-            this.hoveringText.position = pos;
-            this.hoveringText.fontSize = 24;
-            this.hoveringText.text = "Items to transfer: " + this.entities.length;
-            this.hoveringText.Show();
 
             var entity = null;
             var len = this.entities.length;
@@ -210,12 +192,6 @@ ObjectGrab.prototype.HandleMouseMove = function(event)
         // If cursor is pointed on floor, reset entity positions to starting positions and set target portals to null.
         else if (raycastResult.entity.id == 11)
         {
-            if (this.targetPortal)
-            {
-
-                this.hoveringText = this.targetPortal.GetOrCreateComponent("EC_HoveringText");
-                this.hoveringText.Hide();
-            }
             this.targetPortal = 0;
             var len = this.entities.length;
             for (var i = 0; i < len; ++i)
@@ -251,7 +227,6 @@ ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
             entity.placeable.transform = transform;
             entity.rigidbody.mass = 10;
             entity.highlight.visible = false;
-            this.hoveringText.Hide();
             this.targetPortal.Exec(1, "Collision",entity.id, scene.name, transform.scale.x);
         }
         return;
