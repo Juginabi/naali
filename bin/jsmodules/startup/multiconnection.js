@@ -2,14 +2,22 @@ if (!server.IsRunning())
 {
     client.switchScene.connect(changeScene);
 
-    function changeScene(name) 
+    function changeScene(name)
     {
-        scene = framework.Scene().GetScene(name);
-        var cameraentity = scene.GetEntityByName("AvatarCamera");
-        if (cameraentity == null)
-            cameraentity = scene.GetEntityByName("FreeLookCamera");
-        var camera = cameraentity.camera;
-        camera.SetActive(camera);
-
+        var targetScene = framework.Scene().GetScene(name);
+        if (targetScene)
+        {
+            var cameraentity = targetScene.GetEntityByName("AvatarCamera");
+            if (cameraentity == null)
+                cameraentity = targetScene.GetEntityByName("FreeLookCamera");
+            if (cameraentity)
+            {
+                var camera = cameraentity.camera;
+                if (camera)
+                    camera.SetActive(camera);
+                else
+                    print("Unable to set camera active for scene: " + targetScene.name);
+            }
+        }
     }
 }
