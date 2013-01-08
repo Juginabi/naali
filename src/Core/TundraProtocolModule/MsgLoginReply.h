@@ -25,13 +25,8 @@ struct MsgLoginReply
         priority = defaultPriority;
     }
 
-<<<<<<< HEAD
     enum { messageID = 101 };
     static inline const char * const Name() { return "LoginReply"; }
-=======
-	enum { messageID = 101 };
-	static inline const char * Name() { return "LoginReply"; }
->>>>>>> 5a5a84f5d1670cc70ad127fe9730b64f2530432a
 
     static const bool defaultReliable = true;
     static const bool defaultInOrder = true;
@@ -41,40 +36,15 @@ struct MsgLoginReply
     bool inOrder;
     u32 priority;
 
-<<<<<<< HEAD
     u8 success;
     u8 userID;
     std::vector<s8> loginReplyData;
-=======
-	u8 success;
-	u32 userID;
-	std::vector<s8> loginReplyData;
->>>>>>> 5a5a84f5d1670cc70ad127fe9730b64f2530432a
 
     inline size_t Size() const
     {
         return 1 + 1 + 2 + loginReplyData.size()*1;
     }
 
-<<<<<<< HEAD
-    inline void SerializeTo(kNet::DataSerializer &dst) const
-    {
-        dst.Add<u8>(success);
-        dst.Add<u8>(userID);
-        dst.Add<u16>(loginReplyData.size());
-        if (loginReplyData.size() > 0)
-            dst.AddArray<s8>(&loginReplyData[0], loginReplyData.size());
-    }
-
-    inline void DeserializeFrom(kNet::DataDeserializer &src)
-    {
-        success = src.Read<u8>();
-        userID = src.Read<u8>();
-        loginReplyData.resize(src.Read<u16>());
-        if (loginReplyData.size() > 0)
-            src.ReadArray<s8>(&loginReplyData[0], loginReplyData.size());
-    }
-=======
 	inline void SerializeTo(kNet::DataSerializer &dst) const
 	{
 		dst.Add<u8>(success);
@@ -92,6 +62,5 @@ struct MsgLoginReply
 		if (loginReplyData.size() > 0)
 			src.ReadArray<s8>(&loginReplyData[0], loginReplyData.size());
 	}
->>>>>>> 5a5a84f5d1670cc70ad127fe9730b64f2530432a
 
 };

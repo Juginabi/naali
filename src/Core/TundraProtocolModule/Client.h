@@ -48,11 +48,7 @@ public:
     ClientLoginState LoginState() const { return loginstate_; }
 
     /// Returns client connection ID (from loginreply message), or zero if not connected.
-<<<<<<< HEAD
-    int ConnectionId() const { return client_id_list_.empty() ? client_id_ : client_id_list_[activescenename_]; }
-=======
-    unsigned int ConnectionId() const { return client_id_; }
->>>>>>> 5a5a84f5d1670cc70ad127fe9730b64f2530432a
+    unsigned int ConnectionId() const { return client_id_list_.empty() ? client_id_ : client_id_list_[activescenename_]; }
 
     /// Returns all the login properties that will be used to login to the server.
     LoginPropertyMap &LoginProperties() { return properties; }

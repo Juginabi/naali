@@ -86,12 +86,9 @@ SyncManager::SyncManager(TundraLogicModule* owner) :
     framework_(owner->GetFramework()),
     updatePeriod_(1.0f / 20.0f),
     updateAcc_(0.0),
-<<<<<<< HEAD
-    sceneID_("")
-=======
+    sceneID_(""),
     maxLinExtrapTime_(3.0f),
     noClientPhysicsHandoff_(false)
->>>>>>> 5a5a84f5d1670cc70ad127fe9730b64f2530432a
 {
     KristalliProtocolModule *kristalli = framework_->GetModule<KristalliProtocolModule>();
     connect(kristalli, SIGNAL(NetworkMessageReceived(kNet::MessageConnection *, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)), 

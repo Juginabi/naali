@@ -145,17 +145,7 @@ void Client::Login(const QString& address, unsigned short port, kNet::SocketTran
         ::LogInfo("Client::Login: No protocol specified, using the default value.");
         protocol = owner_->GetKristalliModule()->defaultTransport;
     }
-<<<<<<< HEAD
-    QString p = "";
-    if (protocol == kNet::SocketOverTCP)
-        p = "tcp";
-    else if (protocol == kNet::SocketOverUDP)
-        p = "udp";
-
-    // Set all login properties we have knowledge of.
-=======
     // Set all login properties we have knowledge of. 
->>>>>>> 5a5a84f5d1670cc70ad127fe9730b64f2530432a
     // Others may have been added before calling this function.
     SetLoginProperty("protocol", QString(SocketTransportLayerToString(protocol).c_str()).toLower());
     SetLoginProperty("address", address);
