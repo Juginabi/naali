@@ -22,7 +22,7 @@ namespace TundraLogic
 class TUNDRAPROTOCOL_MODULE_API Client : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(int connectionId READ GetConnectionID)
+    Q_PROPERTY(unsigned int connectionId READ GetConnectionID)
     Q_PROPERTY(ClientLoginState loginState READ LoginState)
     Q_PROPERTY(bool connected READ IsConnected)
     Q_ENUMS(ClientLoginState)
@@ -48,7 +48,11 @@ public:
     ClientLoginState LoginState() const { return loginstate_; }
 
     /// Returns client connection ID (from loginreply message), or zero if not connected.
+<<<<<<< HEAD
     int ConnectionId() const { return client_id_list_.empty() ? client_id_ : client_id_list_[activescenename_]; }
+=======
+    unsigned int ConnectionId() const { return client_id_; }
+>>>>>>> 5a5a84f5d1670cc70ad127fe9730b64f2530432a
 
     /// Returns all the login properties that will be used to login to the server.
     LoginPropertyMap &LoginProperties() { return properties; }
@@ -117,7 +121,7 @@ public slots:
     void emitSceneSwitch(const QString name);
 
     QString GetLoginProperty(QString key) const { return LoginProperty(key); } ///< @deprecated Use LoginProperty. @todo Add warning print
-    int GetConnectionID() const { return ConnectionId(); } ///< @deprecated Use ConnectionId. @todo Add warning print.
+    unsigned int GetConnectionID() const { return ConnectionId(); } ///< @deprecated Use ConnectionId. @todo Add warning print.
 
     /// Get connected scene names
     QStringList getSceneNames();
@@ -182,7 +186,7 @@ private:
     ClientLoginState loginstate_; ///< Client's connection/login state
     LoginPropertyMap properties; ///< Specifies all the login properties.
     bool reconnect_; ///< Whether the connect attempt is a reconnect because of dropped connection
-    u8 client_id_; ///< User ID, once known
+    u32 client_id_; ///< User ID, once known
     TundraLogicModule* owner_; ///< Owning module
     Framework* framework_; ///< Framework pointer
     QString sceneName;

@@ -193,7 +193,7 @@ var BrowserManager = Class.extend
          client.LoginFailed.connect(this, this.onLoginFailed);
          client.Connected.connect(this, this.onConnected);
          client.Disconnected.connect(this, this.onDisconnected);
-         client.switchScene.connect(this, this.onSwitchScene);
+         client.SwitchScene.connect(this, this.onSwitchScene);
          ui.GraphicsScene().sceneRectChanged.connect(this, this.windowResized);
 
          browserplugin.ActionAddRequest.connect(this.addTool);
@@ -600,6 +600,7 @@ var BrowserManager = Class.extend
      },
      onSwitchScene: function(sceneid)
      {
+         print("Derp!");
          p_.tabs.currentIndex = this.clientTabOrderList.indexOf(sceneid);
          //p_.onTabIndexChanged(p_.tabs.currentIndex);
      },
