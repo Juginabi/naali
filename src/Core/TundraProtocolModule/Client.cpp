@@ -167,7 +167,7 @@ void Client::Login(const QString& address, unsigned short port, kNet::SocketTran
     loginstate_ = ConnectionPending;
     client_id_ = 0;
     // Save clientId, reconnect, loginstate etc
-    saveProperties();
+    SaveProperties();
 }
 
 void Client::Logout(const QString &name)
@@ -204,7 +204,7 @@ void Client::DoLogout(bool fail)
             ::LogInfo("Disconnected");
         }
         
-        removeProperties(discScene);
+        RemoveProperties(discScene);
         
         emit Disconnected(discScene);
     }
@@ -219,7 +219,7 @@ void Client::DoLogout(bool fail)
         // Clear all the login properties we used for this session, so that the next login session will start from an
         // empty set of login properties (just-in-case).
         if (client_id_list_.contains(discScene))
-            removeProperties(discScene);
+            RemoveProperties(discScene);
     }
 
     if (loginstate_list_.isEmpty())
@@ -252,7 +252,7 @@ bool Client::IsConnected(const QString& address, unsigned short port, const QStr
         if (tempMap["address"] == address && tempMap["port"] == QString::number(port) && tempMap["protocol"] == tempProtocol)
         {
             setActiveScenename(iter.key());
-            emit switchScene(iter.key());
+            emit SwitchScene(iter.key());
             return true;
         }
         ++iter;
@@ -458,7 +458,7 @@ void Client::HandleLoginReply(MessageConnection* source, const MsgLoginReply& ms
                 scene->RemoveAllEntities(true, AttributeChange::LocalOnly);
         }
         reconnect_ = true;
-        saveProperties(sceneName);
+        SaveProperties(sceneName);
     }
     else
     {
@@ -477,7 +477,7 @@ void Client::HandleClientLeft(MessageConnection* /*source*/, const MsgClientLeft
 {
 }
 
-void Client::saveProperties(const QString name)
+void Client::SaveProperties(const QString name)
 {
     // Login happened and replace NEW-marked properties with scenename.
     if (name != "NEW" && loginstate_list_.contains(name))
@@ -560,7 +560,7 @@ QStringList Client::getSceneNames()
     return loginstate_list_.keys();
 }
 
-void Client::removeProperties(const QString &name)
+void Client::RemoveProperties(const QString &name)
 {
     loginstate_list_.remove(discScene);
     client_id_list_.remove(discScene);
@@ -576,7 +576,7 @@ void Client::emitSceneSwitch(const QString name)
     {
         ::LogInfo("Sceneswitch: " + name);
         activescenename_ = name;
-        emit switchScene(name);
+        emit SwitchScene(name);
     }
 }
 

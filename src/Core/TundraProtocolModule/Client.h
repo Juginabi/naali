@@ -149,7 +149,7 @@ signals:
     /// Emitted when a login attempt failed to a server.
     void LoginFailed(const QString &reason);
 
-    void switchScene(const QString name);
+    void SwitchScene(const QString name);
 
 private slots:
     /// Handles a Kristalli protocol message
@@ -162,10 +162,10 @@ private slots:
 
 private:
     /// Saves connection properties to Containers
-    void saveProperties(const QString name = "NEW");
+    void SaveProperties(const QString name = "NEW");
 
     /// Removes connection properties from containers
-    void removeProperties(const QString &name);
+    void RemoveProperties(const QString &name);
 
     /// Handles pending login to server
     void CheckLogin();
