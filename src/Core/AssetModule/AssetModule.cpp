@@ -96,7 +96,7 @@ void AssetModule::Initialize()
         SLOT(ServerNewUserConnected(unsigned int, UserConnection *, UserConnectedResponseData *)));
 
     TundraLogic::Client *client = framework_->GetModule<TundraLogic::TundraLogicModule>()->GetClient().get();
-    connect(client, SIGNAL(Connected(UserConnectedResponseData *)), this, SLOT(ClientConnectedToServer(UserConnectedResponseData *)));
+    connect(client, SIGNAL(Connected(QString, UserConnectedResponseData *)), this, SLOT(ClientConnectedToServer(QString, UserConnectedResponseData *)));
     connect(client, SIGNAL(Disconnected(const QString)), this, SLOT(ClientDisconnectedFromServer()));
 
     KristalliProtocolModule *kristalli = framework_->GetModule<KristalliProtocolModule>();
@@ -242,7 +242,7 @@ void AssetModule::DetermineStorageTrustStatus(AssetStoragePtr storage)
     }
 }
 
-void AssetModule::ClientConnectedToServer(UserConnectedResponseData *responseData)
+void AssetModule::ClientConnectedToServer(QString sceneName, UserConnectedResponseData *responseData)
 {
     QDomDocument &doc = responseData->responseData;
     QDomElement assetRoot = doc.firstChildElement("asset");
