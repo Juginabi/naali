@@ -115,7 +115,7 @@ if (!framework.IsHeadless())
     }
 
     function Disconnect() {
-        client.Logout(client.getActiveScenename());
+        client.Logout(framework.Scene().MainCameraScene().name);
     }
 
     function Connected() {
@@ -127,7 +127,7 @@ if (!framework.IsHeadless())
         var scene;
         var sceneNames;
 
-        sceneNames = client.getSceneNames();
+        sceneNames = client.GetSceneNames();
         if (sceneNames[0] == undefined)
         {
             disconnectAction.enabled = false;
@@ -142,7 +142,6 @@ if (!framework.IsHeadless())
         if (!cameraentity)
             cameraentity = scene.GetEntityByName("FreeLookCamera");
         var camera = cameraentity.camera;
-        client.setActiveScenename(sceneNames[0]);
         camera.SetActive(camera);
     }
 

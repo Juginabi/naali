@@ -367,9 +367,9 @@ var BrowserManager = Class.extend
          QMessageBox.warning(ui.MainWindow(), "Login Failed", failReason);
      },
 
-     onConnected: function()
+     onConnected: function(scenename)
      {
-         var scenename = client.getActiveScenename();
+         this.onTabIndexChanged(this.tabs.currentIndex);
          var newIndex = this.tabs.addTab(new ClassicLogin().widget, scenename);
          this.connected[newIndex] = true;
          this.clientTabOrderList[newIndex] = scenename;
@@ -600,7 +600,6 @@ var BrowserManager = Class.extend
      },
      onSwitchScene: function(sceneid)
      {
-         print("Derp!");
          p_.tabs.currentIndex = this.clientTabOrderList.indexOf(sceneid);
          //p_.onTabIndexChanged(p_.tabs.currentIndex);
      },
@@ -640,8 +639,8 @@ var BrowserManager = Class.extend
             p_.actionAddFavorite.enabled = true;
             p_.tabs.setTabToolTip(index, "Connected to a Tundra server");
             var scenename = this.clientTabOrderList[index];
-            if (scenename != client.getActiveScenename())
-                client.emitSceneSwitch(scenename);
+            if (scenename != framework.Scene().MainCameraScene().name)
+                client.EmitSwitchScene(scenename);
             var loginPropAddress = "Server: " + client.GetLoginProperty("port");
             if (loginPropAddress.charAt(loginPropAddress.length-1) == "/")
                 loginPropAddress = ServerloginPropAddress.substring(0, loginPropAddress.length-1);

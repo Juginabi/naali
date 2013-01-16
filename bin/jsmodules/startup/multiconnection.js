@@ -1,6 +1,6 @@
 if (!server.IsRunning())
 {
-    client.switchScene.connect(changeScene);
+    client.SwitchScene.connect(changeScene);
 
     function changeScene(name)
     {
