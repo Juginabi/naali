@@ -80,8 +80,8 @@ public:
     /// What trasport layer to use. Read on startup from "--protocol <udp|tcp>". Defaults to UDP if no start param was given.
     kNet::SocketTransportLayer defaultTransport;
 
-    /// Sets serverConnection ID to match server/client scene name on login.
-    void SetIdentifier(const QString identifier);
+    /// Get connection ID to match messageconnection in syncmanager or client data storages.
+    QString GetConnectionID(kNet::MessageConnection *source);
 
     /// Returns iterator to serverConnection_map_
     QMapIterator<QString, Ptr(kNet::MessageConnection)> GetConnectionArray() { return QMapIterator<QString, Ptr(kNet::MessageConnection)> (serverConnection_map_); }
@@ -146,6 +146,9 @@ private:
 
     /// Multiconnection update method
     void ProcessConnections();
+
+    /// Name of the connection currently being established.
+    QString connectionID;
 
     QStringList removeConnections;
 #ifdef KNET_USE_QT

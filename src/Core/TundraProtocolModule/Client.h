@@ -48,7 +48,7 @@ public:
     ClientLoginState LoginState() const { return loginstate_; }
 
     /// Returns client connection ID (from loginreply message), or zero if not connected.
-    unsigned int ConnectionId() const { return client_id_list_.empty() ? client_id_ : client_id_list_[activescenename_]; }
+    unsigned int ConnectionId() const;
 
     /// Returns all the login properties that will be used to login to the server.
     LoginPropertyMap &LoginProperties() { return properties; }
@@ -111,22 +111,16 @@ public slots:
     void ClearLoginProperties() { properties.clear(); }
 
     /// Prints scene names from loginstate_list_ keys
-    void printSceneNames();
+    void PrintSceneNames();
 
     /// Signal to javascript to switch main camera scene
-    void emitSceneSwitch(const QString name);
+    void EmitSwitchScene(const QString name);
 
     QString GetLoginProperty(QString key) const { return LoginProperty(key); } ///< @deprecated Use LoginProperty. @todo Add warning print
     unsigned int GetConnectionID() const { return ConnectionId(); } ///< @deprecated Use ConnectionId. @todo Add warning print.
 
     /// Get connected scene names
-    QStringList getSceneNames();
-
-    /// Set active scenename for multiconnection
-    void setActiveScenename(const QString &name) { activescenename_ = name; }
-
-    /// Get active scenename for multiconnection
-    QString getActiveScenename() { return activescenename_; }
+    QStringList GetSceneNames();
 
 signals:
     /// This signal is emitted right before this client is starting to connect to a Tundra server.
@@ -138,7 +132,7 @@ signals:
 
     /// This signal is emitted immediately after this client has successfully connected to a server.
     /// @param responseData This is the data that the server sent back to the client related to the connection.
-    void Connected(UserConnectedResponseData *responseData);
+    void Connected(QString sceneName, UserConnectedResponseData *responseData);
 
     /// Triggered whenever a new message is received from the network.
     void NetworkMessageReceived(kNet::packet_id_t, kNet::message_id_t id, const char *data, size_t numBytes);
@@ -162,7 +156,7 @@ private slots:
 
 private:
     /// Saves connection properties to Containers
-    void SaveProperties(const QString name = "NEW");
+    void SaveProperties(QString);
 
     /// Removes connection properties from containers
     void RemoveProperties(const QString &name);
@@ -197,8 +191,6 @@ private:
     QMap<QString, u8> client_id_list_;
     // Scene to be disconnected
     QString discScene;
-    // Current active scenename
-    QString activescenename_;
 };
 
 }

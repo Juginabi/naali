@@ -160,10 +160,16 @@ void Client::Login(const QString& address, unsigned short port, kNet::SocketTran
     connect(kristalli, SIGNAL(ConnectionAttemptFailed(QString&)), this, SLOT(OnConnectionAttemptFailed(QString&)), Qt::UniqueConnection);
 
     owner_->GetKristalliModule()->Connect(address.toStdString().c_str(), port, protocol);
+
     loginstate_ = ConnectionPending;
     client_id_ = 0;
+
+    QString sceneName;
+    sceneName.append(address+"-"+QString::number(port));
+    protocol == SocketOverUDP ? sceneName.append("-udp") : sceneName.append("-tcp");
+
     // Save clientId, reconnect, loginstate etc
-    SaveProperties();
+    SaveProperties(sceneName);
 }
 
 void Client::Logout(const QString &name)
@@ -188,7 +194,7 @@ void Client::DoLogout(bool fail)
     if (!keys.contains(discScene))
     {
         discScene = "";
-        printSceneNames();
+        PrintSceneNames();
         return;
     }
 
@@ -247,7 +253,6 @@ bool Client::IsConnected(const QString& address, unsigned short port, const QStr
         tempMap = iter.value();
         if (tempMap["address"] == address && tempMap["port"] == QString::number(port) && tempMap["protocol"] == tempProtocol)
         {
-            setActiveScenename(iter.key());
             emit SwitchScene(iter.key());
             return true;
         }
@@ -268,9 +273,14 @@ void Client::SetLoginProperty(QString key, QString value)
 QString Client::LoginProperty(QString key) const
 {
     LoginPropertyMap tempMap;
+    QString sceneName = "";
+    Scene* scene = framework_->Scene()->MainCameraScene();
 
-    if (properties_list_.contains(activescenename_))
-        tempMap = properties_list_[activescenename_];
+    if (scene)
+        sceneName = scene->Name();
+
+    if (properties_list_.contains(sceneName))
+        tempMap = properties_list_[sceneName];
     else
         tempMap = properties_list_["NEW"];
 
@@ -420,19 +430,16 @@ void Client::HandleLoginReply(MessageConnection* source, const MsgLoginReply& ms
         loginstate_ = LoggedIn;
         client_id_ = msg.userID;
 
-        // Build scenename which is used as identifier for syncmanager/ogre/ScenePtr and scene specific data. Example sceneName: 127.0.0.1:2345:udp
-        sceneName = QString::fromAscii(source->GetSocket()->DestinationAddress()) + "-" +QString::number(source->GetSocket()->DestinationPort());
-        source->GetSocket()->TransportLayer() == kNet::SocketOverUDP ? sceneName.append("-udp") : sceneName.append("-tcp");
+        // Request scenename from KristalliModule based on source. This is to match ID in all the data maps across the modules.
+        sceneName = owner_->GetKristalliModule()->GetConnectionID(source);
 
-        activescenename_ = sceneName;
-        
         // Note: create scene & send info of login success only on first connection, not on reconnect
         if (!reconnect_list_[sceneName])
         {
             // This sets identifier in KristalliProtocolModule for this particular connection
             // This is kinda ugly way to do this because this requires us to signal data back the
             // messaging chain in order to keep track of connection lists.
-            owner_->GetKristalliModule()->SetIdentifier(sceneName);
+            //owner_->GetKristalliModule()->SetIdentifier(sceneName);
 
             // Create a non-authoritative scene for the client
             ScenePtr scene = framework_->Scene()->CreateScene(sceneName, true, false);
@@ -441,7 +448,10 @@ void Client::HandleLoginReply(MessageConnection* source, const MsgLoginReply& ms
             if (msg.loginReplyData.size() > 0)
                 responseData.responseData.setContent(QByteArray((const char *)&msg.loginReplyData[0], (int)msg.loginReplyData.size()));
 
-            emit Connected(&responseData);
+            reconnect_ = true;
+            SaveProperties(sceneName);
+
+            emit Connected(sceneName, &responseData);
         }
         else
         {
@@ -454,7 +464,6 @@ void Client::HandleLoginReply(MessageConnection* source, const MsgLoginReply& ms
                 scene->RemoveAllEntities(true, AttributeChange::LocalOnly);
         }
         reconnect_ = true;
-        SaveProperties(sceneName);
     }
     else
     {
@@ -473,66 +482,23 @@ void Client::HandleClientLeft(MessageConnection* /*source*/, const MsgClientLeft
 {
 }
 
-void Client::SaveProperties(const QString name)
+void Client::SaveProperties(QString sceneName)
 {
-    // Login happened and replace NEW-marked properties with scenename.
-    if (name != "NEW" && loginstate_list_.contains(name))
-    {
-        ::LogInfo("Reconnection saving properties " + name + "\n");
-        // Container for all the connections loginstates
-        loginstate_list_.insert(name, loginstate_);
-        // Container for all the connections reconnect bool value
-        reconnect_list_.insert(name, reconnect_);
-        // Container for all the connections clientID values
-        client_id_list_.insert(name, client_id_);
-        // Container for all the connections properties
-        //properties_list_.insert(name, properties_list_[name]);
-        // Container for all the connections loginstates
-    }
-    else if (name != "NEW" && !loginstate_list_.contains(name))
-    {
-        ::LogInfo("NEW connection ready. Switching identifier to " + name + ".\n");
-        // Container for all the connections loginstates
-        loginstate_list_.insert(name, loginstate_);
-        // Container for all the connections reconnect bool value
-        reconnect_list_.insert(name, reconnect_);
-        // Container for all the connections clientID values
-        client_id_list_.insert(name, client_id_);
-        // Container for all the connections properties
-        properties_list_.insert(name, properties_list_["NEW"]);
-        // Container for all the connections loginstates
-        loginstate_list_.remove("NEW");
-        loginstate_ = NotConnected;
-        // Container for all the connections reconnect bool value
-        reconnect_list_.remove("NEW");
-        reconnect_ = false;
-        // Container for all the connections clientID values
-        client_id_list_.remove("NEW");
-        // Container for all the connections properties
-        properties_list_.remove("NEW");
-        properties.clear();
-    }
-    else
-    {
-        // Initial connection attempt.
-
-        ::LogInfo("New connection saving properties NEW.\n");
-        // Container for all the connections loginstates
-        loginstate_list_.insert(name, loginstate_);
-        loginstate_ = NotConnected;
-        // Container for all the connections reconnect bool value
-        reconnect_list_.insert(name, reconnect_);
-        reconnect_ = false;
-        // Container for all the connections clientID values
-        client_id_list_.insert(name, client_id_);
-        client_id_ = 0;
-        // Container for all the connections properties
-        properties_list_.insert(name, properties);
-        properties.clear();
-    }
+    // Container for all the connections loginstates
+    loginstate_list_.insert(sceneName, loginstate_);
+    loginstate_ = NotConnected;
+    // Container for all the connections reconnect bool value
+    reconnect_list_.insert(sceneName, reconnect_);
+    reconnect_ = false;
+    // Container for all the connections clientID values
+    client_id_list_.insert(sceneName, client_id_);
+    client_id_ = 0;
+    // Container for all the connections properties
+    properties_list_.insert(sceneName, properties);
+    properties.clear();
 }
 
-void Client::printSceneNames()
+void Client::PrintSceneNames()
 {
     QMap< QString, std::map<QString, QString> >::const_iterator iter = properties_list_.begin();
     if (iter == properties_list_.end())
@@ -550,7 +516,7 @@ void Client::printSceneNames()
     }
 }
 
-QStringList Client::getSceneNames()
+QStringList Client::GetSceneNames()
 {
     // Used in javascript
     return loginstate_list_.keys();
@@ -558,22 +524,27 @@ QStringList Client::getSceneNames()
 
 void Client::RemoveProperties(const QString &name)
 {
+    ::LogInfo("removing property!");
     loginstate_list_.remove(discScene);
     client_id_list_.remove(discScene);
     reconnect_list_.remove(discScene);
     properties_list_.remove(discScene);
 }
 
-void Client::emitSceneSwitch(const QString name)
+void Client::EmitSwitchScene(const QString name)
 {
     if (!loginstate_list_.contains(name))
-        printSceneNames();
+        PrintSceneNames();
     else
     {
         ::LogInfo("Sceneswitch: " + name);
-        activescenename_ = name;
         emit SwitchScene(name);
     }
+}
+
+unsigned int Client::ConnectionId() const
+{
+    return client_id_list_.empty() ? client_id_ : client_id_list_[framework_->Scene()->MainCameraScene()->Name()];
 }
 
 }

@@ -313,7 +313,7 @@ void TundraLogicModule::removeSyncManager(const QString name)
 }
 
 void TundraLogicModule::switchscene(const QString name) {
-    client_->emitSceneSwitch(name);
+    client_->EmitSwitchScene(name);
 }
 
 SyncManager* TundraLogicModule::GetSyncManager() const
@@ -485,7 +485,7 @@ bool TundraLogicModule::ImportMesh(QString filename, const float3 &pos, const fl
 
 void TundraLogicModule::listConnections()
 {
-    client_->printSceneNames();
+    client_->PrintSceneNames();
 }
 
 bool TundraLogicModule::IsServer() const

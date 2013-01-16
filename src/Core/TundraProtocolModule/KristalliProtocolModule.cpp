@@ -189,8 +189,8 @@ void KristalliProtocolModule::Update(f64 /*frametime*/)
             if (serverConnectionIter_.value())
                 serverConnectionIter_.value()->Process();
 
-            if (key == "NEW" && !serverConnection_map_.contains("NEW"))
-                continue;
+//            if (key == "NEW" && !serverConnection_map_.contains("NEW"))
+//                continue;
             // Note: Calling the above serverConnection->Process() may set serverConnection to null if the connection gets disconnected.
             // Therefore, in the code below, we cannot assume serverConnection is non-null, and must check it again.
 
@@ -247,12 +247,17 @@ void KristalliProtocolModule::Update(f64 /*frametime*/)
 
 void KristalliProtocolModule::Connect(const char *ip, unsigned short port, SocketTransportLayer transport)
 {
-    serverIp_map_.insert("NEW",ip);
-    serverPort_map_.insert("NEW",port);
-    serverTransport_map_.insert("NEW", transport);
-    reconnectAttempts_map_.insert("NEW", cInitialAttempts); // Initial attempts when establishing connection
-    serverConnection_map_.insert("NEW", serverConnection);
-    reconnectTimer_map_.insert("NEW",reconnectTimer);
+    // Build identifier for this connection attempt.
+    connectionID.clear();
+    connectionID.append(QString::fromAscii(ip)+"-"+QString::number(port));
+    transport == SocketOverUDP ? connectionID.append("-udp") : connectionID.append("-tcp");
+
+    serverIp_map_.insert(connectionID,ip);
+    serverPort_map_.insert(connectionID,port);
+    serverTransport_map_.insert(connectionID, transport);
+    reconnectAttempts_map_.insert(connectionID, cInitialAttempts); // Initial attempts when establishing connection
+    serverConnection_map_.insert(connectionID, serverConnection);
+    reconnectTimer_map_.insert(connectionID,reconnectTimer);
 
     PerformConnection(); // Start performing a connection attempt to the desired address/port/transport
 }
@@ -260,19 +265,19 @@ void KristalliProtocolModule::Connect(const char *ip, unsigned short port, Socke
 void KristalliProtocolModule::PerformConnection()
 {
     // Connect to the server.
-    serverConnection_map_["NEW"] = network.Connect(serverIp_map_["NEW"].c_str(), serverPort_map_["NEW"], serverTransport_map_["NEW"], this);
-    if (!serverConnection_map_["NEW"])
+    serverConnection_map_[connectionID] = network.Connect(serverIp_map_[connectionID].c_str(), serverPort_map_[connectionID], serverTransport_map_[connectionID], this);
+    if (!serverConnection_map_[connectionID])
     {
-        ::LogError("Unable to connect to " + serverIp_map_["NEW"] + ":" + ToString(serverPort_map_["NEW"]));
+        ::LogError("Unable to connect to " + serverIp_map_[connectionID] + ":" + ToString(serverPort_map_[connectionID]));
         return;
     }
 
-    if (serverTransport_map_["NEW"] == kNet::SocketOverUDP)
-        dynamic_cast<kNet::UDPMessageConnection*>(serverConnection_map_["NEW"].ptr())->SetDatagramSendRate(500);
+    if (serverTransport_map_[connectionID] == kNet::SocketOverUDP)
+        dynamic_cast<kNet::UDPMessageConnection*>(serverConnection_map_[connectionID].ptr())->SetDatagramSendRate(500);
 
     // For TCP mode sockets, disable Nagle's option to improve latency for the messages we send.
-    if (serverConnection_map_["NEW"]->GetSocket() && serverConnection_map_["NEW"]->GetSocket()->TransportLayer() == kNet::SocketOverTCP)
-        serverConnection_map_["NEW"]->GetSocket()->SetNaglesAlgorithmEnabled(false);
+    if (serverConnection_map_[connectionID]->GetSocket() && serverConnection_map_[connectionID]->GetSocket()->TransportLayer() == kNet::SocketOverTCP)
+        serverConnection_map_[connectionID]->GetSocket()->SetNaglesAlgorithmEnabled(false);
 }
 
 void KristalliProtocolModule::PerformReconnection(QMutableMapIterator<QString, Ptr(kNet::MessageConnection)> &conReference, QString key)
@@ -464,30 +469,41 @@ UserConnectionPtr KristalliProtocolModule::GetUserConnection(u32 id) const
     return UserConnectionPtr();
 }
 
-void KristalliProtocolModule::SetIdentifier(const QString identifier)
+//void KristalliProtocolModule::SetIdentifier(const QString identifier)
+//{
+//    // Client logged in. Get all properties from maps which are "NEW" and apply
+//    // scenename to it. This allows us to call for correct connection to scene.
+//    Ptr(kNet::MessageConnection) con = serverConnection_map_.value("NEW");
+//    std::string ip = serverIp_map_.value("NEW");
+//    unsigned short port = serverPort_map_.value("NEW");
+//    kNet::SocketTransportLayer transport = serverTransport_map_.value("NEW");
+//    int attempts = reconnectAttempts_map_.value("NEW");
+//    kNet::PolledTimer timer = reconnectTimer_map_.value("NEW");
+
+//    serverConnection_map_.insert(identifier,con);
+//    serverIp_map_.insert(identifier,ip);
+//    serverPort_map_.insert(identifier,port);
+//    serverTransport_map_.insert(identifier,transport);
+//    reconnectAttempts_map_.insert(identifier,attempts);
+//    reconnectTimer_map_.insert(identifier,timer);
+
+//    serverIp_map_.remove("NEW");
+//    serverPort_map_.remove("NEW");
+//    serverTransport_map_.remove("NEW");
+//    reconnectAttempts_map_.remove("NEW");
+//    reconnectTimer_map_.remove("NEW");
+//    serverConnection_map_.remove("NEW");
+//}
+
+QString KristalliProtocolModule::GetConnectionID(MessageConnection *source)
 {
-    // Client logged in. Get all properties from maps which are "NEW" and apply
-    // scenename to it. This allows us to call for correct connection to scene.
-    Ptr(kNet::MessageConnection) con = serverConnection_map_.value("NEW");
-    std::string ip = serverIp_map_.value("NEW");
-    unsigned short port = serverPort_map_.value("NEW");
-    kNet::SocketTransportLayer transport = serverTransport_map_.value("NEW");
-    int attempts = reconnectAttempts_map_.value("NEW");
-    kNet::PolledTimer timer = reconnectTimer_map_.value("NEW");
-
-    serverConnection_map_.insert(identifier,con);
-    serverIp_map_.insert(identifier,ip);
-    serverPort_map_.insert(identifier,port);
-    serverTransport_map_.insert(identifier,transport);
-    reconnectAttempts_map_.insert(identifier,attempts);
-    reconnectTimer_map_.insert(identifier,timer);
-
-    serverIp_map_.remove("NEW");
-    serverPort_map_.remove("NEW");
-    serverTransport_map_.remove("NEW");
-    reconnectAttempts_map_.remove("NEW");
-    reconnectTimer_map_.remove("NEW");
-    serverConnection_map_.remove("NEW");
+    for (QMapIterator<QString, Ptr(kNet::MessageConnection) > iter(serverConnection_map_);iter.hasNext();)
+    {
+        iter.next();
+        if (iter.value().ptr() == source)
+            return iter.key();
+    }
+    return 0;
 }
 
 kNet::MessageConnection * KristalliProtocolModule::GetMessageConnection(const QString &name)
