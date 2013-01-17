@@ -273,16 +273,13 @@ void Client::SetLoginProperty(QString key, QString value)
 QString Client::LoginProperty(QString key) const
 {
     LoginPropertyMap tempMap;
-    QString sceneName = "";
+    QString sceneName;
     Scene* scene = framework_->Scene()->MainCameraScene();
 
-    if (scene)
-        sceneName = scene->Name();
+    scene ? sceneName = scene->Name() : sceneName = "";
 
-    if (properties_list_.contains(sceneName))
-        tempMap = properties_list_[sceneName];
-    else
-        tempMap = properties_list_["NEW"];
+    // Get the right properties from the container.
+    properties_list_.contains(sceneName) ? tempMap = properties_list_[sceneName] : tempMap = LoginPropertyMap();
 
     key = key.trimmed();
     LoginPropertyMap::const_iterator i = tempMap.find(key);
@@ -431,11 +428,12 @@ void Client::HandleLoginReply(MessageConnection* source, const MsgLoginReply& ms
         client_id_ = msg.userID;
 
         // Request scenename from KristalliModule based on source. This is to match ID in all the data maps across the modules.
-        sceneName = owner_->GetKristalliModule()->GetConnectionID(source);
+        QString sceneName = owner_->GetKristalliModule()->GetConnectionID(source);
 
         // Note: create scene & send info of login success only on first connection, not on reconnect
         if (!reconnect_list_[sceneName])
         {
+            ::LogInfo("Handle connection!");
             // This sets identifier in KristalliProtocolModule for this particular connection
             // This is kinda ugly way to do this because this requires us to signal data back the
             // messaging chain in order to keep track of connection lists.
@@ -464,6 +462,7 @@ void Client::HandleLoginReply(MessageConnection* source, const MsgLoginReply& ms
                 scene->RemoveAllEntities(true, AttributeChange::LocalOnly);
         }
         reconnect_ = true;
+        SaveProperties(sceneName);
     }
     else
     {
@@ -486,16 +485,12 @@ void Client::SaveProperties(QString sceneName)
 {
     // Container for all the connections loginstates
     loginstate_list_.insert(sceneName, loginstate_);
-    loginstate_ = NotConnected;
     // Container for all the connections reconnect bool value
     reconnect_list_.insert(sceneName, reconnect_);
-    reconnect_ = false;
     // Container for all the connections clientID values
     client_id_list_.insert(sceneName, client_id_);
-    client_id_ = 0;
     // Container for all the connections properties
     properties_list_.insert(sceneName, properties);
-    properties.clear();
 }
 
 void Client::PrintSceneNames()

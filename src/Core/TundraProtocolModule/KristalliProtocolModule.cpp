@@ -189,8 +189,6 @@ void KristalliProtocolModule::Update(f64 /*frametime*/)
             if (serverConnectionIter_.value())
                 serverConnectionIter_.value()->Process();
 
-//            if (key == "NEW" && !serverConnection_map_.contains("NEW"))
-//                continue;
             // Note: Calling the above serverConnection->Process() may set serverConnection to null if the connection gets disconnected.
             // Therefore, in the code below, we cannot assume serverConnection is non-null, and must check it again.
 
@@ -468,32 +466,6 @@ UserConnectionPtr KristalliProtocolModule::GetUserConnection(u32 id) const
 
     return UserConnectionPtr();
 }
-
-//void KristalliProtocolModule::SetIdentifier(const QString identifier)
-//{
-//    // Client logged in. Get all properties from maps which are "NEW" and apply
-//    // scenename to it. This allows us to call for correct connection to scene.
-//    Ptr(kNet::MessageConnection) con = serverConnection_map_.value("NEW");
-//    std::string ip = serverIp_map_.value("NEW");
-//    unsigned short port = serverPort_map_.value("NEW");
-//    kNet::SocketTransportLayer transport = serverTransport_map_.value("NEW");
-//    int attempts = reconnectAttempts_map_.value("NEW");
-//    kNet::PolledTimer timer = reconnectTimer_map_.value("NEW");
-
-//    serverConnection_map_.insert(identifier,con);
-//    serverIp_map_.insert(identifier,ip);
-//    serverPort_map_.insert(identifier,port);
-//    serverTransport_map_.insert(identifier,transport);
-//    reconnectAttempts_map_.insert(identifier,attempts);
-//    reconnectTimer_map_.insert(identifier,timer);
-
-//    serverIp_map_.remove("NEW");
-//    serverPort_map_.remove("NEW");
-//    serverTransport_map_.remove("NEW");
-//    reconnectAttempts_map_.remove("NEW");
-//    reconnectTimer_map_.remove("NEW");
-//    serverConnection_map_.remove("NEW");
-//}
 
 QString KristalliProtocolModule::GetConnectionID(MessageConnection *source)
 {

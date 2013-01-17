@@ -131,6 +131,7 @@ signals:
     void AboutToConnect();
 
     /// This signal is emitted immediately after this client has successfully connected to a server.
+    /// @param sceneName This is identification of the scene created to handle multiconnection related scenarios.
     /// @param responseData This is the data that the server sent back to the client related to the connection.
     void Connected(QString sceneName, UserConnectedResponseData *responseData);
 
@@ -179,7 +180,6 @@ private:
     u32 client_id_; ///< User ID, once known
     TundraLogicModule* owner_; ///< Owning module
     Framework* framework_; ///< Framework pointer
-    QString sceneName;
 
     // Container for all the connections loginstates
     QMap<QString,ClientLoginState> loginstate_list_;
