@@ -1,0 +1,48 @@
+
+// blender material: kort_side-walk-1
+material kort_side-walk-1__.._props_ext_landscape_kortteli_road.blend 
+{
+    receive_shadows on
+    technique
+    {
+        pass kort_side-walk-1
+        {
+            ambient 0.800000011920929 0.800000011920929 0.800000011920929 1.0
+            diffuse 0.6400000190734865 0.6400000190734865 0.6400000190734865 1.0
+            specular 0.08000000238418581 0.08000000238418581 0.08000000238418581 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+            texture_unit 
+            {
+                texture finnkino_brick.dds
+                tex_address_mode wrap
+                scale 0.01 0.01
+                tex_coord_set 0
+                colour_op modulate
+            }
+            texture_unit 
+            {
+                texture kort_side-walk-ao.dds
+                tex_address_mode wrap
+                scale 1.0 1.0
+                tex_coord_set 0
+                colour_op modulate
+            }
+        }
+    }
+}

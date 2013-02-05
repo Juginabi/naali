@@ -1,0 +1,53 @@
+<mesh>
+    <sharedgeometry vertexcount="6">
+        <vertexbuffer positions="true" normals="true" texture_coord_dimensions_0="float2" texture_coord_dimensions_1="float4" texture_coords="2">
+            <vertex>
+                <position x="62.5035" y="13.0134" z="-60.1508" />
+                <normal x="0" y="0.780228" z="0.625495" />
+                <texcoord u="0.605342" v="0.685342" />
+                <texcoord u="1" v="0" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="62.5035" y="16.5384" z="-64.5478" />
+                <normal x="0" y="0.780228" z="0.625495" />
+                <texcoord u="0.605342" v="0.321378" />
+                <texcoord u="1" v="0" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="52.3786" y="13.0134" z="-60.1508" />
+                <normal x="0" y="0.780228" z="0.625495" />
+                <texcoord u="0.437218" v="0.685342" />
+                <texcoord u="1" v="0" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="67.1786" y="13.0134" z="-60.1508" />
+                <normal x="0" y="0.780228" z="0.625495" />
+                <texcoord u="0.762782" v="0.685342" />
+                <texcoord u="1" v="0" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="62.5035" y="16.5384" z="-64.5478" />
+                <normal x="0" y="0.780228" z="0.625495" />
+                <texcoord u="0.605342" v="0.321378" />
+                <texcoord u="1" v="0" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="62.5035" y="13.0134" z="-60.1508" />
+                <normal x="0" y="0.780228" z="0.625495" />
+                <texcoord u="0.605342" v="0.685342" />
+                <texcoord u="1" v="0" w="0" x="1" />
+            </vertex>
+        </vertexbuffer>
+    </sharedgeometry>
+    <submeshes>
+        <submesh material="bldg_2_roof-b__.._props_ext_bldg_2_bldg_2_roof.blend" usesharedvertices="true" use32bitindexes="false" operationtype="triangle_list">
+            <faces count="2">
+                <face v1="0" v2="1" v3="2" />
+                <face v1="3" v2="4" v3="5" />
+            </faces>
+        </submesh>
+    </submeshes>
+    <submeshnames>
+        <submeshname name="bldg_2_roof-b__.._props_ext_bldg_2_bldg_2_roof.blend" index="0" />
+    </submeshnames>
+</mesh>

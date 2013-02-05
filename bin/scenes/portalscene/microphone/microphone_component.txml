@@ -1,0 +1,6 @@
+<component type="EC_Mesh" sync="1" >
+  <attribute name="Mesh ref" value="microphone3D.mesh" />
+  <attribute name="Mesh materials" value="microphone3D.material;microphone3D_2.material;microphone3D_3.material" />
+  <attribute name="Draw distance" value="0" />
+  <attribute name="Cast shadows" value="false" />
+</component>

@@ -1,0 +1,36 @@
+
+// blender material: ext_post
+material ext_post__.._props_fixtures_ext_post.blend 
+{
+	receive_shadows on
+	technique b2ogre_1328256751.528116
+	{
+		pass b2ogre_1328256751.528142
+		{
+			alpha_to_coverage off
+			colour_write on
+			cull_hardware clockwise
+			depth_check on
+			depth_func less_equal
+			depth_write on
+			illumination_stage 
+			light_clip_planes off
+			light_scissor off
+			lighting on
+			normalise_normals off
+			polygon_mode solid
+			scene_blend one zero
+			scene_blend_op add
+			shading gouraud
+			transparent_sorting on
+			texture_unit b2ogre_1328256751.528372
+			{
+				texture 15_ext_post-ao.dds
+				tex_address_mode wrap
+				scale 1.0 1.0
+				tex_coord_set 0
+				colour_op modulate
+			}
+		}
+	}
+}

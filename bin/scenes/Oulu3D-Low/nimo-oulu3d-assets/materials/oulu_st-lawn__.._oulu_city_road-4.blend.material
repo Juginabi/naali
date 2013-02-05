@@ -1,0 +1,56 @@
+
+// blender material: oulu_st-lawn
+material oulu_st-lawn__.._oulu_city_road-4.blend 
+{
+	receive_shadows on
+	technique b2ogre_1331804914.943052
+	{
+		pass b2ogre_1331804914.943068
+		{
+			ambient 0.08660474419593811 0.1823413223028183 0.057135894894599915 1.0
+			diffuse 0.06928379638915949 0.1458730600159326 0.045708716596792875 1.0
+			specular 0.0 0.0 0.0 1.0 12.5
+			emissive 0.0 0.0 0.0 1.0
+			alpha_to_coverage off
+			colour_write on
+			cull_hardware clockwise
+			depth_check on
+			depth_func less_equal
+			depth_write on
+			illumination_stage 
+			light_clip_planes off
+			light_scissor off
+			lighting on
+			normalise_normals off
+			polygon_mode solid
+			scene_blend one zero
+			scene_blend_op add
+			shading gouraud
+			transparent_sorting on
+			texture_unit b2ogre_1331804914.943378
+			{
+				texture oulu_street-lawn_comb.dds
+				tex_address_mode wrap
+				scale 1.0 1.0
+				tex_coord_set 0
+				colour_op replace
+			}
+			texture_unit b2ogre_1331804914.943919
+			{
+				texture Grass012-BW.dds
+				tex_address_mode wrap
+				scale 0.025 0.025
+				tex_coord_set 0
+				colour_op modulate
+			}
+			texture_unit b2ogre_1331804914.944716
+			{
+				texture oulu_st-lawn_ao.dds
+				tex_address_mode wrap
+				scale 1.0 1.0
+				tex_coord_set 0
+				colour_op modulate
+			}
+		}
+	}
+}

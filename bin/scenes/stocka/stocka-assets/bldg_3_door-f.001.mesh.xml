@@ -1,0 +1,41 @@
+<mesh>
+    <sharedgeometry vertexcount="4">
+        <vertexbuffer positions="true" normals="true" texture_coord_dimensions_0="float2" texture_coord_dimensions_1="float4" texture_coords="2">
+            <vertex>
+                <position x="0" y="1.11" z="0.600002" />
+                <normal x="1" y="0" z="-0" />
+                <texcoord u="0.256238" v="0.014981" />
+                <texcoord u="0" v="0" w="-1" x="1" />
+            </vertex>
+            <vertex>
+                <position x="0" y="-1.11" z="0.600002" />
+                <normal x="1" y="0" z="-0" />
+                <texcoord u="0.256239" v="0.988439" />
+                <texcoord u="0" v="0" w="-1" x="1" />
+            </vertex>
+            <vertex>
+                <position x="0" y="-1.11" z="-0.599998" />
+                <normal x="1" y="0" z="-0" />
+                <texcoord u="0.743762" v="0.988439" />
+                <texcoord u="0" v="0" w="-1" x="1" />
+            </vertex>
+            <vertex>
+                <position x="0" y="1.11" z="-0.599998" />
+                <normal x="1" y="0" z="-0" />
+                <texcoord u="0.743761" v="0.014981" />
+                <texcoord u="0" v="0" w="-1" x="1" />
+            </vertex>
+        </vertexbuffer>
+    </sharedgeometry>
+    <submeshes>
+        <submesh material="bldg_3_door-f__.._props_ext_bldg_3_bldg_3_door_n_win.blend" usesharedvertices="true" use32bitindexes="false" operationtype="triangle_list">
+            <faces count="2">
+                <face v1="0" v2="1" v3="2" />
+                <face v1="0" v2="2" v3="3" />
+            </faces>
+        </submesh>
+    </submeshes>
+    <submeshnames>
+        <submeshname name="bldg_3_door-f__.._props_ext_bldg_3_bldg_3_door_n_win.blend" index="0" />
+    </submeshnames>
+</mesh>

@@ -1,0 +1,93 @@
+<mesh>
+    <sharedgeometry vertexcount="12">
+        <vertexbuffer positions="true" normals="true" texture_coord_dimensions_0="float2" texture_coord_dimensions_1="float4" texture_coords="2">
+            <vertex>
+                <position x="-2.91807" y="1.27491" z="-2.03325" />
+                <normal x="3e-06" y="1" z="-4e-06" />
+                <texcoord u="0.992405" v="0.28502" />
+                <texcoord u="-0.840176" v="3.51273e-07" w="-0.542314" x="1" />
+            </vertex>
+            <vertex>
+                <position x="-3.08024" y="1.27491" z="-1.77838" />
+                <normal x="3e-06" y="1" z="-4e-06" />
+                <texcoord u="0.992405" v="0.249618" />
+                <texcoord u="-0.840176" v="3.51273e-07" w="-0.542314" x="1" />
+            </vertex>
+            <vertex>
+                <position x="2.89094" y="1.27491" z="2.07587" />
+                <normal x="3e-06" y="1" z="-4e-06" />
+                <texcoord u="0.003156" v="0.249618" />
+                <texcoord u="-0.840176" v="3.51273e-07" w="-0.542314" x="1" />
+            </vertex>
+            <vertex>
+                <position x="3.05311" y="1.27491" z="1.82101" />
+                <normal x="3e-06" y="1" z="-4e-06" />
+                <texcoord u="0.003156" v="0.28502" />
+                <texcoord u="-0.840176" v="3.51273e-07" w="-0.542314" x="1" />
+            </vertex>
+            <vertex>
+                <position x="-2.94491" y="-1.56309" z="-1.99107" />
+                <normal x="0.54223" y="-0.017612" z="-0.840046" />
+                <texcoord u="0.998688" v="0.749532" />
+                <texcoord u="-0.840176" v="-3.67415e-09" w="-0.542314" x="1" />
+            </vertex>
+            <vertex>
+                <position x="-2.91807" y="1.27491" z="-2.03325" />
+                <normal x="0.54223" y="-0.017612" z="-0.840046" />
+                <texcoord u="0.998688" v="0.250485" />
+                <texcoord u="-0.840176" v="-4.19903e-09" w="-0.542314" x="1" />
+            </vertex>
+            <vertex>
+                <position x="3.05311" y="1.27491" z="1.82101" />
+                <normal x="0.54223" y="-0.017612" z="-0.840046" />
+                <texcoord u="0.000747" v="0.250485" />
+                <texcoord u="-0.840176" v="-3.14927e-09" w="-0.542314" x="1" />
+            </vertex>
+            <vertex>
+                <position x="3.02627" y="-1.56309" z="1.86318" />
+                <normal x="0.54223" y="-0.017612" z="-0.840046" />
+                <texcoord u="0.000747" v="0.749532" />
+                <texcoord u="-0.840176" v="-4.19903e-09" w="-0.542314" x="1" />
+            </vertex>
+            <vertex>
+                <position x="2.89094" y="1.27491" z="2.07587" />
+                <normal x="-0.542314" y="0" z="0.840176" />
+                <texcoord u="0.000747" v="0.250485" />
+                <texcoord u="-0.840176" v="-4.86513e-08" w="-0.542314" x="-1" />
+            </vertex>
+            <vertex>
+                <position x="-3.08024" y="1.27491" z="-1.77838" />
+                <normal x="-0.542314" y="0" z="0.840176" />
+                <texcoord u="0.998688" v="0.250485" />
+                <texcoord u="-0.840176" v="-1.34187e-07" w="-0.542314" x="-1" />
+            </vertex>
+            <vertex>
+                <position x="-3.08024" y="-1.56309" z="-1.77838" />
+                <normal x="-0.542314" y="0" z="0.840176" />
+                <texcoord u="0.998688" v="0.749532" />
+                <texcoord u="-0.840176" v="-8.55356e-08" w="-0.542314" x="-1" />
+            </vertex>
+            <vertex>
+                <position x="2.89094" y="-1.56309" z="2.07587" />
+                <normal x="-0.542314" y="0" z="0.840176" />
+                <texcoord u="0.000747" v="0.749532" />
+                <texcoord u="-0.840176" v="0" w="-0.542314" x="-1" />
+            </vertex>
+        </vertexbuffer>
+    </sharedgeometry>
+    <submeshes>
+        <submesh material="wall_block-1__.._props_ext_misc_fence_n_gates.blend" usesharedvertices="true" use32bitindexes="false" operationtype="triangle_list">
+            <faces count="6">
+                <face v1="0" v2="1" v3="2" />
+                <face v1="0" v2="2" v3="3" />
+                <face v1="4" v2="5" v3="6" />
+                <face v1="4" v2="6" v3="7" />
+                <face v1="8" v2="9" v3="10" />
+                <face v1="8" v2="10" v3="11" />
+            </faces>
+        </submesh>
+    </submeshes>
+    <submeshnames>
+        <submeshname name="wall_block-1__.._props_ext_misc_fence_n_gates.blend" index="0" />
+    </submeshnames>
+</mesh>

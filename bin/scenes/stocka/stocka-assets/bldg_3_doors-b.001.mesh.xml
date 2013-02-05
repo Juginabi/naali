@@ -1,0 +1,93 @@
+<mesh>
+    <sharedgeometry vertexcount="12">
+        <vertexbuffer positions="true" normals="true" texture_coord_dimensions_0="float2" texture_coord_dimensions_1="float4" texture_coords="2">
+            <vertex>
+                <position x="1.47011" y="1.30536" z="0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.000574" v="0" />
+                <texcoord u="-1" v="6.30757e-07" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="1.47011" y="0.437236" z="0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.000574" v="0.374998" />
+                <texcoord u="-1" v="4.45526e-07" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="-1.47011" y="0.437235" z="-0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.999537" v="0.374999" />
+                <texcoord u="-1" v="6.02133e-07" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="-1.47011" y="1.30536" z="-0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.999537" v="1e-06" />
+                <texcoord u="-1" v="7.87365e-07" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="1.47011" y="0.437236" z="0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.000574" v="0.374998" />
+                <texcoord u="-1" v="0.000434157" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="1.47011" y="0.28172" z="0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.000574" v="0.461571" />
+                <texcoord u="-1" v="0.00088217" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="-1.47011" y="0.284312" z="-0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.999537" v="0.461572" />
+                <texcoord u="-1" v="0.000448384" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="-1.47011" y="0.437235" z="-0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.999537" v="0.374999" />
+                <texcoord u="-1" v="2.46219e-07" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="1.47011" y="0.28172" z="0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.000574" v="0.461571" />
+                <texcoord u="-0.99998" v="0.00636273" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="1.47011" y="-2.04631" z="0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0" v="1" />
+                <texcoord u="-0.999901" v="0.0140788" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="-1.47011" y="-2.00492" z="-0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.998973" v="1" />
+                <texcoord u="-0.999963" v="0.00862623" w="0" x="1" />
+            </vertex>
+            <vertex>
+                <position x="-1.47011" y="0.284312" z="-0" />
+                <normal x="0" y="0" z="-1" />
+                <texcoord u="0.999537" v="0.461572" />
+                <texcoord u="-1" v="0.000882988" w="0" x="1" />
+            </vertex>
+        </vertexbuffer>
+    </sharedgeometry>
+    <submeshes>
+        <submesh material="door-1__.._props_ext_bldg_3_doors.blend" usesharedvertices="true" use32bitindexes="false" operationtype="triangle_list">
+            <faces count="6">
+                <face v1="0" v2="1" v3="2" />
+                <face v1="0" v2="2" v3="3" />
+                <face v1="4" v2="5" v3="6" />
+                <face v1="4" v2="6" v3="7" />
+                <face v1="8" v2="9" v3="10" />
+                <face v1="8" v2="10" v3="11" />
+            </faces>
+        </submesh>
+    </submeshes>
+    <submeshnames>
+        <submeshname name="door-1__.._props_ext_bldg_3_doors.blend" index="0" />
+    </submeshnames>
+</mesh>

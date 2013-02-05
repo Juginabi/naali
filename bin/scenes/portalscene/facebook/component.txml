@@ -1,0 +1,6 @@
+<component type="EC_Mesh" sync="1" >
+  <attribute name="Mesh ref" value="facebook3D.mesh" />
+  <attribute name="Mesh materials" value="facebook3D.material;facebook3D_2.material" />
+  <attribute name="Draw distance" value="0" />
+  <attribute name="Cast shadows" value="false" />
+</component>

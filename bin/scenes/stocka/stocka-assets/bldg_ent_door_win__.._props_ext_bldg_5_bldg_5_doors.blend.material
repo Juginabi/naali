@@ -1,0 +1,48 @@
+
+// blender material: bldg_ent_door_win
+material bldg_ent_door_win__.._props_ext_bldg_5_bldg_5_doors.blend 
+{
+    receive_shadows on
+    technique
+    {
+        pass bldg_ent_door_win
+        {
+            ambient 0.8892017602920532 0.8941054940223694 0.882194995880127 1.0
+            diffuse 0.7113614188337536 0.7152844058764636 0.7057560072206854 1.0
+            specular 0.10000000149011612 0.10000000149011612 0.10000000149011612 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+            texture_unit 
+            {
+                texture door-entrance-2.dds
+                tex_address_mode wrap
+                scale 0.3333333333333333 0.3333333333333333
+                tex_coord_set 0
+                colour_op modulate
+            }
+            texture_unit 
+            {
+                texture bldg_ent_door_ao.dds
+                tex_address_mode wrap
+                scale 1.0 1.0
+                tex_coord_set 0
+                colour_op modulate
+            }
+        }
+    }
+}

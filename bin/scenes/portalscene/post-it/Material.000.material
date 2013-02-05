@@ -1,0 +1,32 @@
+
+// blender material: Material.000
+material Material.000 
+{
+    receive_shadows on
+    technique
+    {
+        pass Material.000
+        {
+            ambient 0.4292260706424713 0.32794153690338135 0.13245591521263123 1.0
+            diffuse 0.34338086163075054 0.26235323343207284 0.10596473374910254 1.0
+            specular 0.0 0.0 0.0 1.0 12.5
+            emissive 0.04292260130787695 0.0327941492922994 0.013245589744890873 1.0
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+        }
+    }
+}

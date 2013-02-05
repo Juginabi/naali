@@ -7,9 +7,15 @@ if (!server.IsRunning())
         var targetScene = framework.Scene().GetScene(name);
         if (targetScene)
         {
-            var cameraentity = targetScene.GetEntityByName("AvatarCamera");
-            if (cameraentity == null)
-                cameraentity = targetScene.GetEntityByName("FreeLookCamera");
+            var cameraentity = scene.GetEntityByName("AvatarCamera");
+            if (!cameraentity)
+            {
+                cameraentity = scene.GetEntityByName("PortalCamera");
+                if (cameraentity == null)
+                {
+                    cameraentity = scene.GetEntityByName("FreeLookCamera");
+                }
+            }
             if (cameraentity)
             {
                 var camera = cameraentity.camera;

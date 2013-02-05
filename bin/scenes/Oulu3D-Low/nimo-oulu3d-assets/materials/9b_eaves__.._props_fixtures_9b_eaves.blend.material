@@ -1,0 +1,36 @@
+
+// blender material: 9b_eaves
+material 9b_eaves__.._props_fixtures_9b_eaves.blend 
+{
+	receive_shadows on
+	technique b2ogre_1328256163.129611
+	{
+		pass b2ogre_1328256163.129635
+		{
+			alpha_to_coverage off
+			colour_write on
+			cull_hardware clockwise
+			depth_check on
+			depth_func less_equal
+			depth_write on
+			illumination_stage 
+			light_clip_planes off
+			light_scissor off
+			lighting on
+			normalise_normals off
+			polygon_mode solid
+			scene_blend one zero
+			scene_blend_op add
+			shading gouraud
+			transparent_sorting on
+			texture_unit b2ogre_1328256163.129863
+			{
+				texture 9b_eaves-comb.dds
+				tex_address_mode wrap
+				scale 1.0 1.0
+				tex_coord_set 0
+				colour_op replace
+			}
+		}
+	}
+}

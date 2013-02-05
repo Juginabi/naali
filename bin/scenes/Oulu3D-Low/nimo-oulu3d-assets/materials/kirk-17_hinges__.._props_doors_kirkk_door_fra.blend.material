@@ -1,0 +1,36 @@
+
+// blender material: kirk-17_hinges
+material kirk-17_hinges__.._props_doors_kirkk_door_fra.blend 
+{
+	receive_shadows on
+	technique b2ogre_1328255800.545679
+	{
+		pass b2ogre_1328255800.545738
+		{
+			alpha_to_coverage off
+			colour_write on
+			cull_hardware clockwise
+			depth_check on
+			depth_func less_equal
+			depth_write on
+			illumination_stage 
+			light_clip_planes off
+			light_scissor off
+			lighting on
+			normalise_normals off
+			polygon_mode solid
+			scene_blend one zero
+			scene_blend_op add
+			shading gouraud
+			transparent_sorting on
+			texture_unit b2ogre_1328255800.546042
+			{
+				texture kirk-17_hinge_comb.dds
+				tex_address_mode wrap
+				scale 1.0 1.0
+				tex_coord_set 0
+				colour_op replace
+			}
+		}
+	}
+}

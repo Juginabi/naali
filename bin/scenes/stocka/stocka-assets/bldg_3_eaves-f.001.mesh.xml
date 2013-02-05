@@ -1,0 +1,41 @@
+<mesh>
+    <sharedgeometry vertexcount="4">
+        <vertexbuffer positions="true" normals="true" texture_coord_dimensions_0="float2" texture_coord_dimensions_1="float4" texture_coords="2">
+            <vertex>
+                <position x="66.3845" y="11.7742" z="-57.6982" />
+                <normal x="0" y="-1" z="-0" />
+                <texcoord u="0.862952" v="0.672796" />
+                <texcoord u="-0.0242388" v="0" w="-0.999706" x="1" />
+            </vertex>
+            <vertex>
+                <position x="66.6845" y="11.7742" z="-57.9982" />
+                <normal x="0" y="-1" z="-0" />
+                <texcoord u="0.946908" v="0.555035" />
+                <texcoord u="-0.0239435" v="0" w="-0.999713" x="1" />
+            </vertex>
+            <vertex>
+                <position x="66.6845" y="11.7742" z="-43.5982" />
+                <normal x="0" y="-1" z="-0" />
+                <texcoord u="0.157933" v="0.687247" />
+                <texcoord u="-0.0242329" v="0" w="-0.999706" x="1" />
+            </vertex>
+            <vertex>
+                <position x="66.3845" y="11.7742" z="-43.8982" />
+                <normal x="0" y="-1" z="-0" />
+                <texcoord u="0.180837" v="0.776861" />
+                <texcoord u="-0.0246159" v="0" w="-0.999697" x="1" />
+            </vertex>
+        </vertexbuffer>
+    </sharedgeometry>
+    <submeshes>
+        <submesh material="bldg_3_eaves__.._props_ext_bldg_3_bldg_3_roof.blend" usesharedvertices="true" use32bitindexes="false" operationtype="triangle_list">
+            <faces count="2">
+                <face v1="0" v2="1" v3="2" />
+                <face v1="0" v2="2" v3="3" />
+            </faces>
+        </submesh>
+    </submeshes>
+    <submeshnames>
+        <submeshname name="bldg_3_eaves__.._props_ext_bldg_3_bldg_3_roof.blend" index="0" />
+    </submeshnames>
+</mesh>

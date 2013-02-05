@@ -1,0 +1,6 @@
+<component type="EC_Mesh" sync="1" >
+  <attribute name="Mesh ref" value="powerPoint3D.mesh" />
+  <attribute name="Mesh materials" value="powerPoint3D.material" />
+  <attribute name="Draw distance" value="0" />
+  <attribute name="Cast shadows" value="false" />
+</component>

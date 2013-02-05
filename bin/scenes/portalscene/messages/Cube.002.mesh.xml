@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mesh>
+    <sharedgeometry vertexcount="16">
+        <vertexbuffer texture_coords="0" positions="true" colours_diffuse="False" normals="true">
+            <vertex>
+                <position y="0.989166" x="-0.333830" z="0.026735"/>
+                <normal y="0.968566" x="-0.182745" z="0.168584"/>
+            </vertex>
+            <vertex>
+                <position y="0.968995" x="-0.333332" z="0.080205"/>
+                <normal y="0.831599" x="-0.152776" z="0.533921"/>
+            </vertex>
+            <vertex>
+                <position y="0.971835" x="-0.326358" z="0.080205"/>
+                <normal y="0.860988" x="-0.168462" z="0.479843"/>
+            </vertex>
+            <vertex>
+                <position y="0.992005" x="-0.315470" z="0.026735"/>
+                <normal y="0.971740" x="-0.180059" z="0.152440"/>
+            </vertex>
+            <vertex>
+                <position y="0.441611" x="-0.359859" z="0.649665"/>
+                <normal y="0.656362" x="-0.257729" z="0.709006"/>
+            </vertex>
+            <vertex>
+                <position y="0.444450" x="-0.327452" z="0.649665"/>
+                <normal y="0.649953" x="-0.268929" z="0.710776"/>
+            </vertex>
+            <vertex>
+                <position y="0.971835" x="-0.326358" z="-0.080204"/>
+                <normal y="0.860988" x="-0.168462" z="-0.479843"/>
+            </vertex>
+            <vertex>
+                <position y="0.444450" x="-0.327452" z="-0.649665"/>
+                <normal y="0.639424" x="-0.292673" z="-0.710959"/>
+            </vertex>
+            <vertex>
+                <position y="0.441611" x="-0.359858" z="-0.649665"/>
+                <normal y="0.646870" x="-0.279794" z="-0.709403"/>
+            </vertex>
+            <vertex>
+                <position y="0.968996" x="-0.333332" z="-0.080204"/>
+                <normal y="0.831599" x="-0.152776" z="-0.533921"/>
+            </vertex>
+            <vertex>
+                <position y="0.146216" x="-0.224099" z="0.953800"/>
+                <normal y="0.554064" x="-0.413251" z="0.722617"/>
+            </vertex>
+            <vertex>
+                <position y="0.143376" x="-0.250023" z="0.924795"/>
+                <normal y="0.554064" x="-0.413251" z="0.722617"/>
+            </vertex>
+            <vertex>
+                <position y="0.146216" x="-0.224099" z="-0.953801"/>
+                <normal y="0.528184" x="-0.455733" z="-0.716453"/>
+            </vertex>
+            <vertex>
+                <position y="0.143376" x="-0.250023" z="-0.920883"/>
+                <normal y="0.528184" x="-0.455733" z="-0.716453"/>
+            </vertex>
+            <vertex>
+                <position y="0.992005" x="-0.315470" z="-0.026734"/>
+                <normal y="0.971740" x="-0.180059" z="-0.152440"/>
+            </vertex>
+            <vertex>
+                <position y="0.989166" x="-0.333830" z="-0.026734"/>
+                <normal y="0.968566" x="-0.182745" z="-0.168584"/>
+            </vertex>
+        </vertexbuffer>
+    </sharedgeometry>
+    <submeshes>
+        <submesh usesharedvertices="true" material="Material" use32bitindexes="False">
+            <faces count="14">
+                <face v1="0" v2="1" v3="2"/>
+                <face v1="0" v2="2" v3="3"/>
+                <face v1="1" v2="4" v3="5"/>
+                <face v1="1" v2="5" v3="2"/>
+                <face v1="6" v2="7" v3="8"/>
+                <face v1="6" v2="8" v3="9"/>
+                <face v1="10" v2="5" v3="4"/>
+                <face v1="10" v2="4" v3="11"/>
+                <face v1="7" v2="12" v3="13"/>
+                <face v1="7" v2="13" v3="8"/>
+                <face v1="14" v2="6" v3="9"/>
+                <face v1="14" v2="9" v3="15"/>
+                <face v1="3" v2="14" v3="15"/>
+                <face v1="3" v2="15" v3="0"/>
+            </faces>
+        </submesh>
+    </submeshes>
+    <submeshnames>
+        <submesh index="0" name="Material">
+        </submesh>
+    </submeshnames>
+</mesh>

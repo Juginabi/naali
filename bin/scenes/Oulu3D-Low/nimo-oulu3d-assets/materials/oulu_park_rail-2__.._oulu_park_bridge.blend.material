@@ -1,0 +1,35 @@
+
+// blender material: oulu_park_rail-2
+material oulu_park_rail-2__.._oulu_park_bridge.blend 
+{
+	receive_shadows on
+	technique b2ogre_1331804914.964035
+	{
+		pass b2ogre_1331804914.964052
+		{
+			alpha_to_coverage off
+			colour_write on
+			cull_hardware clockwise
+			depth_check on
+			depth_func less_equal
+			depth_write on
+			illumination_stage 
+			light_clip_planes off
+			light_scissor off
+			lighting on
+			normalise_normals off
+			polygon_mode solid
+			scene_blend one zero
+			scene_blend_op add
+			shading gouraud
+			transparent_sorting on
+			texture_unit b2ogre_1331804914.964298
+			{
+				texture oulu_park_fence-2_ao.dds
+				tex_address_mode wrap
+				scale 1.0 1.0
+				colour_op modulate
+			}
+		}
+	}
+}
