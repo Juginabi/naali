@@ -16,7 +16,7 @@
   <plugin path="DebugStatsModule" />            <!-- DebugStatsModule depends on OgreRenderingModule, EnvironmentModule, OgreAssetEditorModule and AssetModule -->
   <plugin path="BrowserUiPlugin" />             <!-- Depends on JavascriptModule -->    
   <plugin path="SceneWidgetComponents" />       <!-- Depends on OgreRenderingModule and TundraProtocolModule (and optionally on BrowserUiPlugin) -->
-  <plugin path="PythonScriptModule" />          <!-- Depends on OgreRenderingModule, TundraProtocolModule -->
+  <!--plugin path="PythonScriptModule" /-->          <!-- Depends on OgreRenderingModule, TundraProtocolModule -->
   <plugin path="MumblePlugin" />                <!-- Depends on OgreRenderingModule, JavascriptModule and TundraLogicModule -->
   <plugin path="VlcPlugin" />                   <!-- Depends on SceneWidgetComponents -->
   <plugin path="CAVEStereoModule" />            <!-- Depends on OgreRenderingModule -->

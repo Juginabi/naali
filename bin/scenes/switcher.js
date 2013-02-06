@@ -45,33 +45,33 @@ if (!server.IsRunning())
 
     function connected()
     {
-	var Entity = me.ParentScene().EntityByName("3D-UI-switch");
-	var privateScene = framework.Scene().GetScene("127.0.0.1-2345-udp");
-	var portalView = privateScene.EntityByName("FreeLookCamera", 0);
-	portalView.camera.SetActive();
-	portalView.GetOrCreateComponent("EC_RttTarget");
-	rttBack = portalView.rtttarget;
-    rttBack.textureName = "FreeLookCamera_portalBack_tex";
-    rttBack.size_x = 400;
-    rttBack.size_y = 300;
-    rttBack.PrepareRtt();
-    rttBack.SetAutoUpdated(true);
-    var matnameBack = rttBack.textureName + "_mat"; //XXX add mat name getter to EC_RttTarget
-    Entity.mesh.SetMaterial(1, matnameBack);
-	client.Connected.disconnect(connected);
-	Entity.placeable.visible = false;
+        var Entity = me.ParentScene().EntityByName("3D-UI-switch");
+    	var privateScene = framework.Scene().GetScene("127.0.0.1-2345-udp");
+    	var portalView = privateScene.EntityByName("FreeLookCamera", 0);
+    	portalView.camera.SetActive();
+    	portalView.GetOrCreateComponent("EC_RttTarget");
+    	rttBack = portalView.rtttarget;
+        rttBack.textureName = "FreeLookCamera_portalBack_tex";
+        rttBack.size_x = 400;
+        rttBack.size_y = 300;
+        rttBack.PrepareRtt();
+        rttBack.SetAutoUpdated(true);
+        var matnameBack = rttBack.textureName + "_mat"; //XXX add mat name getter to EC_RttTarget
+        Entity.mesh.SetMaterial(1, matnameBack);
+    	client.Connected.disconnect(connected);
+    	Entity.placeable.visible = false;
     }
 
     function setVisible(name)
     {
 	if (name == me.ParentScene().name)
 	{
-            print("Setting switcher visible! " + me.ParentScene().name)
-	        me.ParentScene().EntityByName("3D-UI-switch").placeable.visible = true;
+        print("Setting switcher visible! " + me.ParentScene().name)
+        me.ParentScene().EntityByName("3D-UI-switch").placeable.visible = true;
 	}
 	else
 	{
-	        me.ParentScene().EntityByName("3D-UI-switch").placeable.visible = false;
+        me.ParentScene().EntityByName("3D-UI-switch").placeable.visible = false;
 	}
     }
 }
