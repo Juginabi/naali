@@ -23,6 +23,11 @@ if (!isServer)
 
     input.TopLevelInputContext().MouseLeftPressed.connect(mouseLeftPress);
     input.TopLevelInputContext().MouseRightPressed.connect(mouseRightPress);
+    
+    input.TouchBegin.connect(OnTouchBegin);
+    input.TouchUpdate.connect(OnTouchUpdate);
+    input.TouchEnd.connect(OnTouchEnd);
+    
     client.Disconnected.connect(clientDisconnected);
     // This happens every frame so be carefull... overwhelming dices!
     me.Action("Collision").Triggered.connect(handleCollision);
@@ -34,6 +39,20 @@ if (!isServer)
     {
         firstRun = false;
         frame.DelayedExecute(1).Triggered.connect(initialize);
+    }
+    function OnTouchBegin()
+    {
+        print("DERP touch begin!");
+    }
+
+    function OnTouchUpdate()
+    {
+        print("DERP touch update!");
+    }
+
+    function OnTouchEnd()
+    {
+        print("DERP touch end!");
     }
 
     function setObjectGrabStatus(state)
