@@ -40,19 +40,19 @@ if (!isServer)
         firstRun = false;
         frame.DelayedExecute(1).Triggered.connect(initialize);
     }
-    function OnTouchBegin()
+    function OnTouchBegin(event)
     {
-        print("DERP touch begin!");
+        print("DERP touch begin! " + event.x + "," + event.y);
     }
 
-    function OnTouchUpdate()
+    function OnTouchUpdate(event)
     {
-        print("DERP touch update!");
+        print("DERP touch update!" + event.x + "," + event.y);
     }
 
-    function OnTouchEnd()
+    function OnTouchEnd(event)
     {
-        print("DERP touch end!");
+        print("DERP touch end!" + event.x + "," + event.y);
     }
 
     function setObjectGrabStatus(state)
