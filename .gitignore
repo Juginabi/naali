@@ -115,9 +115,4 @@ CMakeScripts/
 tundra.build/
 
 # Scenes with large binary assets
-bin/scenes/Outdoor
-bin/scenes/office2_t2
-bin/scenes/Oulu3D-Low
-bin/scenes/clubhouse_t2
-bin/scenes/portalscene
-bin/scenes/stocka
+bin/scenes/

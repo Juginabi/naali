@@ -10,6 +10,8 @@ if (!server.IsRunning())
         var parentReference = me.placeable.parentRef;
         parentReference.ref = me.ParentScene().EntityByName("PortalCamera");
         me.placeable.parentRef = parentReference;
+        var matnameBack = "FreeLookCamera_portalBack_tex_mat"; //XXX add mat name getter to EC_RttTarget
+        me.mesh.SetMaterial(1, matnameBack);
         //print("Set parent: " + me.placeable.parentRef.ref);
     }
 
@@ -51,8 +53,8 @@ if (!server.IsRunning())
     	var privateScene = framework.Scene().GetScene("127.0.0.1-2345-udp");
     	var portalView = privateScene.EntityByName("FreeLookCamera", 0);
     	portalView.camera.SetActive();
-    	portalView.GetOrCreateComponent("EC_RttTarget");
-    	rttBack = portalView.rtttarget;
+    	var rttBack = portalView.GetOrCreateComponent("EC_RttTarget");
+    	//rttBack = portalView.rtttarget;
         rttBack.textureName = "FreeLookCamera_portalBack_tex";
         rttBack.size_x = 400;
         rttBack.size_y = 300;
@@ -68,7 +70,6 @@ if (!server.IsRunning())
     {
 	if (name == me.ParentScene().name)
 	{
-        print("Setting switcher visible! " + me.ParentScene().name)
         me.ParentScene().EntityByName("3D-UI-switch").placeable.visible = true;
 	}
 	else

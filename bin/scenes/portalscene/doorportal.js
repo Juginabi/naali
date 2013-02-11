@@ -318,7 +318,9 @@ if (!isServer)
             rttBack.PrepareRtt();
             rttBack.SetAutoUpdated(true);
             var matnameBack = rttBack.textureName + "_mat"; //XXX add mat name getter to EC_RttTarget
-            Entity.mesh.SetMaterial(1, matnameBack);
+            // Since 2.4.1 this does not set the material yet.
+            // Need to reapply in switcher.js
+            Entity.mesh.SetMaterial(1, matnameBack); 
 
         }
         cam.camera.SetActive();
