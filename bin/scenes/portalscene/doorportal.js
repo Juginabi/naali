@@ -43,14 +43,14 @@ if (!isServer)
     }
     function OnTouchBegin(event)
     {
-        touchPoints = event.NumTouchPoints();
-        print("DERP touch begin! " + event.x + "," + event.y + ", " + touchPoints);
+        touchPoints = event.touchPoints();
+        print("DERP touch begin! " + touchPoints[0].pos().x() + "," + touchPoints[0].pos().y());
     }
 
     function OnTouchUpdate(event)
     {
-        touchPoints = event.NumTouchPoints();
-        print("DERP touch update!" + event.x + "," + event.y + ", " + touchPoints);
+        touchPoints = event.touchPoints();
+        print("DERP touch update!" + touchPoints[0].pos().x() + "," + touchPoints[0].pos().y());
     }
 
     function OnTouchEnd(event)
