@@ -16,6 +16,7 @@ if (!isServer)
     var conName = "";
     var freelookcameraPlaceable = null;
     var objectGrabbed = 0;
+    var touchPoints = 0;
 
     var parentEntity = this.me;
     if (!parentEntity)
@@ -42,16 +43,19 @@ if (!isServer)
     }
     function OnTouchBegin(event)
     {
-        print("DERP touch begin! " + event.x + "," + event.y);
+        touchPoints = event.NumTouchPoints();
+        print("DERP touch begin! " + event.x + "," + event.y + ", " + touchPoints);
     }
 
     function OnTouchUpdate(event)
     {
-        print("DERP touch update!" + event.x + "," + event.y);
+        touchPoints = event.NumTouchPoints();
+        print("DERP touch update!" + event.x + "," + event.y + ", " + touchPoints);
     }
 
     function OnTouchEnd(event)
     {
+        touchPoints = 0;
         print("DERP touch end!" + event.x + "," + event.y);
     }
 
