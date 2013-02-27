@@ -42,6 +42,7 @@ PortalManager.prototype.ClientInit = function()
     print("[Portal Manager] Client initialize.");
     
     engine.ImportExtension("qt.core");
+    engine.ImportExtension("qt.gui");
 
 	var entityIDs = scene.Entities();
     var re = new RegExp("^camdisplaywall");
@@ -116,7 +117,7 @@ PortalManager.prototype.OnTouchBegin = function(event)
 
     for (i in this.touchPoints)
     {
-        print("TouchEvent started at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
+        //print("TouchEvent started at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
     }
@@ -124,17 +125,21 @@ PortalManager.prototype.OnTouchBegin = function(event)
 
 PortalManager.prototype.OnTouchUpdate = function(event)
 {
-	print("[Portal Manager] OnTouchUpdate");
+	//print("[Portal Manager] OnTouchUpdate");
 
 	this.touchPoints = event.touchPoints();
 
     for (i in this.touchPoints)
     {
-        print("TouchEvent updated at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
+        //print("TouchEvent updated at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
         if (this.lastTouchY < this.touchPoints[i].pos().y())
-            print("Moving upward.");
+            print("Moving downward...");
         else if (this.lastTouchY > this.touchPoints[i].pos().y())
-            print("Moving downward.");
+            print("Moving upward...");
+        if (this.lastTouchX < this.touchPoints[i].pos().x())
+            print("..and right!");
+        else if (this.lastTouchX < this.touchPoints[i].pos().x())
+            print("..and left!");
     }
     this.lastTouchX = this.touchPoints[i].pos().x();
     this.lastTouchY = this.touchPoints[i].pos().y();
@@ -144,7 +149,7 @@ PortalManager.prototype.OnTouchEnd = function(event)
 {
     for (i in this.touchPoints)
     {
-	   print("[Portal Manager] OnTouchEnd at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
+        //print("[Portal Manager] OnTouchEnd at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
     }
