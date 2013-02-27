@@ -114,7 +114,7 @@ PortalManager.prototype.OnTouchBegin = function(event)
 
 	this.touchPoints = event.touchPoints();
 
-    for (var i = 0; i < this.touchpoints.length; ++i)
+    for (i in this.touchPoints)
     {
         print("TouchEvent started at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
         this.lastTouchX = this.touchPoints[i].pos().x();
@@ -128,7 +128,7 @@ PortalManager.prototype.OnTouchUpdate = function(event)
 
 	this.touchPoints = event.touchPoints();
 
-    for (var i = 0; i < this.touchpoints.length; ++i)
+    for (i in this.touchPoints)
     {
         print("TouchEvent updated at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
         if (this.lastTouchY < this.touchPoints[i].pos().y())
@@ -142,9 +142,12 @@ PortalManager.prototype.OnTouchUpdate = function(event)
 
 PortalManager.prototype.OnTouchEnd = function(event)
 {
-	print("[Portal Manager] OnTouchEnd at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
-    this.lastTouchX = this.touchPoints[i].pos().x();
-    this.lastTouchY = this.touchPoints[i].pos().y();
+    for (i in this.touchPoints)
+    {
+	   print("[Portal Manager] OnTouchEnd at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
+        this.lastTouchX = this.touchPoints[i].pos().x();
+        this.lastTouchY = this.touchPoints[i].pos().y();
+    }
 }
 
 PortalManager.prototype.setObjectGrabStatus = function(state)
