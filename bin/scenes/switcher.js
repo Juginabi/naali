@@ -17,29 +17,30 @@ if (!server.IsRunning())
 
     function mouseLeftPress(event)
     {
-	scene = framework.Scene().MainCameraScene();
-	if (scene.name != "127.0.0.1-2345-udp")
+    scene = framework.Scene().MainCameraScene();
+    if (scene.name != "127.0.0.1-2345-udp")
+    {
+        var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xffffffff);
+        if(raycastResult.entity != null && raycastResult.entity.name == "3D-UI-switch")
         {
-            var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xffffffff);
-            print("Name: " + raycastResult.entity.Name());
-            if(raycastResult.entity != null && raycastResult.entity.name == "3D-UI-switch")
+            var privateScene = framework.Scene().GetScene("127.0.0.1-2345-udp");
+            if (privateScene == null)
+                privateScene = framework.Scene().GetScene("localhost-2345-udp");
+            if (privateScene)
             {
-                var privateScene = framework.Scene().GetScene("127.0.0.1-2345-udp");
-                if (privateScene)
-                {
-                    print("Changing back to private scene!");
-                    client.EmitSwitchScene("127.0.0.1-2345-udp");
-                    me.ParentScene().EntityByName("3D-UI-switch").placeable.visible = false;
-                }
-                else
-                {
-                    print("Logging in back to private scene!");
-                    var ip = "127.0.0.1";
-                    client.Connected.connect(newCon);
-                    client.Login(ip, 2345,"lal", "pass", "udp");
-                }
+                print("Changing back to private scene!");
+                client.EmitSwitchScene(privateScene.name);
+                me.ParentScene().EntityByName("3D-UI-switch").placeable.visible = false;
+            }
+            else
+            {
+                print("Logging in back to private scene!");
+                var ip = "127.0.0.1";
+                client.Connected.connect(newCon);
+                client.Login(ip, 2345,"lal", "pass", "udp");
             }
         }
+    }
     } // Function mouseleftpress body ends
 
     function newCon()

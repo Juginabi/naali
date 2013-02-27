@@ -53,13 +53,13 @@
    <attribute value="camdisplaywall1" name="name"/>
    <attribute value="" name="description"/>
   </component>
-  <component type="EC_Script" sync="true" name="PortalScript">
+  <!--component type="EC_Script" sync="true" name="PortalScript">
    <attribute value="doorportal.js" name="Script ref"/>
    <attribute value="true" name="Run on load"/>
    <attribute value="0" name="Run mode"/>
    <attribute value="PortalScript" name="Script application name"/>
    <attribute value="" name="Script class name"/>
-  </component>
+  </component-->
  </entity>
  <entity id="3" sync="1">
  <component type="EC_Placeable" sync="true">
@@ -101,13 +101,13 @@
    <attribute value="camdisplaywall2" name="name"/>
    <attribute value="" name="description"/>
   </component>
-  <component type="EC_Script" sync="true" name="PortalScript">
+  <!--component type="EC_Script" sync="true" name="PortalScript">
    <attribute value="doorportal.js" name="Script ref"/>
    <attribute value="true" name="Run on load"/>
    <attribute value="0" name="Run mode"/>
    <attribute value="PortalScript" name="Script application name"/>
    <attribute value="" name="Script class name"/>
-  </component>
+  </component-->
  </entity>
  <entity id="4" sync="1">
  <component type="EC_Placeable" sync="true">
@@ -149,13 +149,13 @@
    <attribute value="camdisplaywall3" name="name"/>
    <attribute value="" name="description"/>
   </component>
-  <component type="EC_Script" sync="true" name="PortalScript">
+  <!--component type="EC_Script" sync="true" name="PortalScript">
    <attribute value="doorportal.js" name="Script ref"/>
    <attribute value="true" name="Run on load"/>
    <attribute value="0" name="Run mode"/>
    <attribute value="PortalScript" name="Script application name"/>
    <attribute value="" name="Script class name"/>
-  </component>
+  </component-->
  </entity>
  <entity id="5" sync="1">
  <component type="EC_Placeable" sync="true">
@@ -197,13 +197,13 @@
    <attribute value="camdisplaywall4" name="name"/>
    <attribute value="" name="description"/>
   </component>
-  <component type="EC_Script" sync="true" name="PortalScript">
+  <!--component type="EC_Script" sync="true" name="PortalScript">
    <attribute value="doorportal.js" name="Script ref"/>
    <attribute value="true" name="Run on load"/>
    <attribute value="0" name="Run mode"/>
    <attribute value="PortalScript" name="Script application name"/>
    <attribute value="" name="Script class name"/>
-  </component>
+  </component-->
  </entity>
  <entity id="6" sync="1">
   <component type="EC_Script" sync="1">
@@ -1047,4 +1047,17 @@
        <attribute value="local://HoveringText.material" name="Material"/>
       </component>
      </entity>
+     <entity id="28" sync="1">
+  <component type="EC_Script" sync="1">
+   <attribute value="portalapplication.js;portal1.js;portal2.js" name="Script ref"/>
+   <attribute value="true" name="Run on load"/>
+   <attribute value="0" name="Run mode"/>
+   <attribute value="PortalApp" name="Script application name"/>
+   <attribute value="" name="Script class name"/>
+  </component>
+  <component type="EC_Name" sync="1">
+   <attribute value="PortalApp" name="name"/>
+   <attribute value="" name="description"/>
+  </component>
+ </entity>
 </scene>
