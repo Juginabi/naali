@@ -2,8 +2,8 @@ if (!server.IsRunning())
 {
     input.TopLevelInputContext().MouseLeftPressed.connect(mouseLeftPress);
     client.SwitchScene.connect(setVisible);
-    input.TopLevelInputContext().MouseMove.connect(checkParent);
-    input.TouchUpdate.connect(checkParent);
+    frame.Updated.connect(checkParent);
+    //input.TouchUpdate.connect(checkParent);
     input.TouchBegin.connect(this, OnTouchBegin);
     //input.TouchUpdate.connect(this, this.OnTouchUpdate);
     //input.TouchEnd.connect(this, OnTouchEnd);
