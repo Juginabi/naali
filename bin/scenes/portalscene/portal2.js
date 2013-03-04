@@ -11,6 +11,8 @@ function PortalManager(entity, comp)
     this.portals = [];
 
     // Touch related
+    this.startTouchX = 0;
+    this.startTouchY = 0;
     this.lastTouchX = 0;
     this.lastTouchY = 0;
     this.currentEntity = null;
@@ -119,8 +121,8 @@ PortalManager.prototype.OnTouchBegin = function(event)
 
     for (var i = 0; i < this.touchPoints.length; ++i)
     {
-        this.lastTouchX = this.touchPoints[i].pos().x();
-        this.lastTouchY = this.touchPoints[i].pos().y();
+        this.startTouchX = this.touchPoints[i].pos().x();
+        this.startTouchY = this.touchPoints[i].pos().y();
         this.currentEntity = this.GetTargetedEntity(this.lastTouchX, this.lastTouchY);   
         this.originalTransform = this.currentEntity.placeable.transform;    
     }
@@ -163,8 +165,11 @@ PortalManager.prototype.OnTouchUpdate = function(event)
 
 PortalManager.prototype.OnTouchEnd = function(event)
 {
+    var directionDown = false;
     for (var i = 0; i < this.touchPoints.length; ++i)
     {
+        if (this.startTouchY < this.touchPoints[i].pos().y())
+            directionDown = true;
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
     }
@@ -175,7 +180,7 @@ PortalManager.prototype.OnTouchEnd = function(event)
         {
             if (this.currentEntity != null && this.currentEntity.id == result.entity.id)
             {
-                this.currentEntity.Exec(1, "MouseLeftPress", event);
+                directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);       
             }
         }
     }
