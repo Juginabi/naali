@@ -122,7 +122,6 @@ PortalManager.prototype.OnTouchBegin = function(event)
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
         this.currentEntity = this.GetTargetedEntity(this.lastTouchX, this.lastTouchY);   
-        this.currentEntity.rigidbody.mass = 0;
         this.originalTransform = this.currentEntity.placeable.transform;    
     }
 }
@@ -132,14 +131,7 @@ PortalManager.prototype.GetTargetedEntity = function(x,y)
     var raycastResult = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
     if (raycastResult.entity != null)
     {
-        var id = raycastResult.entity.id;
-        // Allow only certain entities to be chosen from portal scene.
-        if (id > 11 && id < 19)
-        {
-            return raycastResult.entity;
-        }
-        else
-            return null;
+        return raycastResult.entity;
     }
     return null;
 }
@@ -160,12 +152,12 @@ PortalManager.prototype.OnTouchUpdate = function(event)
     {
         if (result.entity.id > 1 && result.entity.id < 6)
         {
-            if (this.currentEntity != null)
+            if (this.currentEntity != null && this.currentEntity.id > 11 && this.currentEntity.id < 19)
             {
+                this.currentEntity.rigidbody.mass = 0;
                 this.currentEntity.placeable.SetPosition(result.entity.placeable.transform.pos);
             }
         }
-
     }
 }
 
