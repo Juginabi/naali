@@ -13,6 +13,7 @@ function PortalManager(entity, comp)
     // Touch related
     this.lastTouchX = 0;
     this.lastTouchY = 0;
+    this.currentEntity = null;
 
     this.isServer = server.IsRunning();
     this.me = entity;
@@ -115,11 +116,16 @@ PortalManager.prototype.OnTouchBegin = function(event)
 
 	this.touchPoints = event.touchPoints();
 
-    for (i in this.touchPoints)
+    for (var i = 0; i < this.touchPoints.length; ++i
     {
-        //print("TouchEvent started at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
+        var raycastResult = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
+        if (raycastResult.entity != null)
+        {
+            this.currentEntity = raycastResult.entity;
+            print("Entity: " + this.currentEntity.name);
+        }
     }
 }
 
@@ -129,30 +135,34 @@ PortalManager.prototype.OnTouchUpdate = function(event)
 
 	this.touchPoints = event.touchPoints();
 
-    for (i in this.touchPoints)
+    for (var i = 0; i < this.touchPoints.length; ++i)
     {
-        //print("TouchEvent updated at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
         if (this.lastTouchY < this.touchPoints[i].pos().y())
             print("Moving downward...");
         else if (this.lastTouchY > this.touchPoints[i].pos().y())
             print("Moving upward...");
         if (this.lastTouchX < this.touchPoints[i].pos().x())
-            print("..and right!");
-        else if (this.lastTouchX < this.touchPoints[i].pos().x())
-            print("..and left!");
+            print("..and right...");
+        else if (this.lastTouchX > this.touchPoints[i].pos().x())
+            print("..and left...");
+        if (this.currentEntity != null)
+            print("...with entity named: " + this.currentEntity.name);
+        this.lastTouchX = this.touchPoints[i].pos().x();
+        this.lastTouchY = this.touchPoints[i].pos().y();
     }
-    this.lastTouchX = this.touchPoints[i].pos().x();
-    this.lastTouchY = this.touchPoints[i].pos().y();
+
 }
 
 PortalManager.prototype.OnTouchEnd = function(event)
 {
-    for (i in this.touchPoints)
+    for (var i = 0; i < this.touchPoints.length; ++i)
     {
         //print("[Portal Manager] OnTouchEnd at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
     }
+    print("Releasing entity: " + this.currentEntity.name);
+    this.currentEntity = null;
 }
 
 PortalManager.prototype.setObjectGrabStatus = function(state)
