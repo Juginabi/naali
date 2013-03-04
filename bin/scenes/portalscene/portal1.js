@@ -54,7 +54,7 @@ Portal.prototype.ClientInit = function()
     //me.Action("makeConnection").Triggered.connect(this, this.makeConnection);
     //me.Action("update").Triggered.connect(this, this.ClientUpdateView);
     //me.Action("objectGrabbed").Triggered.connect(this, this.setObjectGrabStatus);
-    frame.Updated.connect(this, this.ClientUpdateView);
+    //frame.Updated.connect(this, this.ClientUpdateView);
 }
 
 Portal.prototype.ClientUpdateView = function(frametime)
