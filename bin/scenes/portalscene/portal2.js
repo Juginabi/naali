@@ -180,7 +180,7 @@ PortalManager.prototype.OnTouchEnd = function(event)
         }
     }
     
-    if (this.currentEntity != null)
+    if (this.currentEntity != null && this.currentEntity.id > 11 && this.currentEntity.id < 19)
     {
         print("Releasing entity: " + this.currentEntity.name);
         this.currentEntity.rigidbody.mass = 10;
