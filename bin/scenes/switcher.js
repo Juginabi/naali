@@ -8,6 +8,9 @@ if (!server.IsRunning())
     //input.TouchUpdate.connect(this, this.OnTouchUpdate);
     //input.TouchEnd.connect(this, OnTouchEnd);
 
+    engine.ImportExtension("qt.core");
+    engine.ImportExtension("qt.gui");
+
     function checkParent()
     {
         //print("Setting freelookCamera parent! " + me.placeable.parentRef.ref);
