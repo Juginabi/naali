@@ -153,13 +153,14 @@ PortalManager.prototype.OnTouchUpdate = function(event)
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
     }
-    var result = scene.ogre.raycastResult(this.lastTouchX, this.lastTouchY);
+    var result = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
     if (result.entity != null)
     {
         if (result.entity.id > 1 && result.entity.id < 6)
         {
             if (this.currentEntity != null)
             {
+                print("Setting placeable transform.");
                 this.originalTransform = this.currentEntity.placeable.transform;
                 this.currentEntity.placeable.SetPosition(result.entity.placeable.transform.pos);
             }
