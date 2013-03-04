@@ -54,7 +54,7 @@ Portal.prototype.ClientInit = function()
     //me.Action("makeConnection").Triggered.connect(this, this.makeConnection);
     //me.Action("update").Triggered.connect(this, this.ClientUpdateView);
     //me.Action("objectGrabbed").Triggered.connect(this, this.setObjectGrabStatus);
-    //frame.Updated.connect(this, this.ClientUpdateView);
+    frame.Updated.connect(this, this.ClientUpdateView);
 }
 
 Portal.prototype.ClientUpdateView = function(frametime)
@@ -113,7 +113,7 @@ Portal.prototype.ClientUpdateView = function(frametime)
 
     var matname = this.rtt.textureName + "_mat"; //XXX add mat name getter to EC_RttTarget
     this.me.mesh.SetMaterial(1, matname);
-    //scene.EntityByName("FreeLookCamera").camera.SetActive();
+    scene.EntityByName("FreeLookCamera").camera.SetActive();
 }
 
 Portal.prototype.OnScriptObjectDestroyed = function()
@@ -158,6 +158,8 @@ Portal.prototype.MouseRightPressed = function(event)
     print("[Portal application] Mouse right pressed in " + this.me.name);
 
     var otherScene = framework.Scene().GetScene(this.conname);
+    if (!otherScene)
+        return;
     var portalCam = otherScene.EntityByName("PortalCamera");
     // Set portal to black color when inactive.
     this.rtt = null;
