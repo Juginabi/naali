@@ -14,6 +14,7 @@ function PortalManager(entity, comp)
     this.lastTouchX = 0;
     this.lastTouchY = 0;
     this.currentEntity = null;
+    this.originalTransform = null;
 
     this.isServer = server.IsRunning();
     this.me = entity;
@@ -116,17 +117,29 @@ PortalManager.prototype.OnTouchBegin = function(event)
 
 	this.touchPoints = event.touchPoints();
 
-    for (var i = 0; i < this.touchPoints.length; ++i
+    for (var i = 0; i < this.touchPoints.length; ++i)
     {
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
-        var raycastResult = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
-        if (raycastResult.entity != null)
-        {
-            this.currentEntity = raycastResult.entity;
-            print("Entity: " + this.currentEntity.name);
-        }
+        this.currentEntity = this.GetTargetedEntity(this.lastTouchX, this.lastTouchY);       
     }
+}
+
+PortalManager.prototype.GetTargetedEntity = function(x,y)
+{
+    var raycastResult = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
+    if (raycastResult.entity != null)
+    {
+        var id = raycastResult.entity.id;
+        // Allow only certain entities to be chosen from portal scene.
+        if (id > 11 && id < 19)
+        {
+            return raycastResult.entity;
+        }
+        else
+            return null;
+    }
+    return null;
 }
 
 PortalManager.prototype.OnTouchUpdate = function(event)
@@ -137,31 +150,36 @@ PortalManager.prototype.OnTouchUpdate = function(event)
 
     for (var i = 0; i < this.touchPoints.length; ++i)
     {
-        if (this.lastTouchY < this.touchPoints[i].pos().y())
-            print("Moving downward...");
-        else if (this.lastTouchY > this.touchPoints[i].pos().y())
-            print("Moving upward...");
-        if (this.lastTouchX < this.touchPoints[i].pos().x())
-            print("..and right...");
-        else if (this.lastTouchX > this.touchPoints[i].pos().x())
-            print("..and left...");
-        if (this.currentEntity != null)
-            print("...with entity named: " + this.currentEntity.name);
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
     }
+    var result = scene.ogre.raycastResult(this.lastTouchX, this.lastTouchY);
+    if (result.entity != null)
+    {
+        if (result.entity.id > 1 && result.entity.id < 6)
+        {
+            if (this.currentEntity != null)
+            {
+                this.originalTransform = this.currentEntity.placeable.transform;
+                this.currentEntity.placeable.SetPosition(result.entity.placeable.transform.pos);
+            }
+        }
 
+    }
 }
 
 PortalManager.prototype.OnTouchEnd = function(event)
 {
     for (var i = 0; i < this.touchPoints.length; ++i)
     {
-        //print("[Portal Manager] OnTouchEnd at (" + this.touchPoints[i].pos().x() + "," + this.touchPoints[i].pos().y() + ")");
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
     }
-    print("Releasing entity: " + this.currentEntity.name);
+    if (this.currentEntity != null)
+    {
+        print("Releasing entity: " + this.currentEntity.name);
+        this.currentEntity.placeable.transform = this.originalTransform;
+    }
     this.currentEntity = null;
 }
 
