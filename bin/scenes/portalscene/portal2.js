@@ -121,7 +121,9 @@ PortalManager.prototype.OnTouchBegin = function(event)
     {
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
-        this.currentEntity = this.GetTargetedEntity(this.lastTouchX, this.lastTouchY);       
+        this.currentEntity = this.GetTargetedEntity(this.lastTouchX, this.lastTouchY);   
+        this.currentEntity.rigidbody.mass = 0;
+        this.originalTransform = this.currentEntity.placeable.transform;    
     }
 }
 
@@ -161,7 +163,6 @@ PortalManager.prototype.OnTouchUpdate = function(event)
             if (this.currentEntity != null)
             {
                 print("Setting placeable transform.");
-                this.originalTransform = this.currentEntity.placeable.transform;
                 this.currentEntity.placeable.SetPosition(result.entity.placeable.transform.pos);
             }
         }
@@ -179,7 +180,10 @@ PortalManager.prototype.OnTouchEnd = function(event)
     if (this.currentEntity != null)
     {
         print("Releasing entity: " + this.currentEntity.name);
-        this.currentEntity.placeable.transform = this.originalTransform;
+        this.currentEntity.rigidbody.mass = 10;
+        var transform = this.currentEntity.placeable.transform;
+        transform = this.originalTransform;
+        this.currentEntity.placeable.transform = transform;
     }
     this.currentEntity = null;
 }
