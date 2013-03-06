@@ -46,8 +46,8 @@ ObjectGrab.prototype.CreateInput = function()
     //inputContext.GestureUpdated.connect(this, this.GestureUpdated);
     inputContext.MouseMove.connect(this, this.HandleMouseMove);
     inputContext.MouseLeftPressed.connect(this, this.HandleMouseLeftPressed);
+    inputContext.MouseLeftReleased.connect(this,this.HandleMouseLeftReleased)
     //inputContext.MouseRightPressed.connect(this, this.HandleMouseRightPressed);
-    //inputContext.MouseLeftReleased.connect(this, this.HandleMouseLeftReleased);
     inputContext.KeyPressed.connect(this, this.HandleKeyPressed);
     inputContext.KeyReleased.connect(this, this.HandleKeyPressed);
 }
@@ -291,39 +291,6 @@ ObjectGrab.prototype.HandleMouseRightPressed = function(event)
 
 ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
 {
-    // If objects are grabbed and on top of the portal transfer them there.
-    if (this.targetPortal)
-    {
-        var length = this.entities.length;
-        for (var i = 0; i < length; ++i)
-        {
-            var entity = scene.EntityById(this.entities.pop());
-            var transform = this.originalTransform.pop();
-            entity.placeable.transform = transform;
-            entity.rigidbody.mass = 10;
-            entity.highlight.visible = false;
-            this.HighlightActivity(false);
-            this.targetPortal.Exec(1, "Collision",entity.id, scene.name, transform.scale.x);
-        }
-        return;
-    }
-    else if (this.trashcan)
-    {
-        var length = this.entities.length;
-        for (var i = 0; i < length; ++i)
-        {
-            var entity = scene.EntityById(this.entities.pop());
-            var transform = this.originalTransform.pop();
-            entity.placeable.transform = transform;
-            entity.rigidbody.mass = 10;
-            entity.highlight.visible = false;
-            this.HighlightActivity(false);
-            scene.RemoveEntity(entity.id, 2);
-            this.trashcan = 0;
-        }
-        return;
-    }
-
     // restrict grabbing of objects to specific items in the scene
     var i = 0;
     var entityID = this.GetTargetedEntity(event.x, event.y);
@@ -360,7 +327,6 @@ ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
         }
         // Select chosen entity and activate highlight component on it.
         var ent = scene.EntityById(entityID);
-        print("Pushing trans: " + ent.placeable.transform);
         this.originalTransform.push(ent.placeable.transform);
         ent.rigidbody.mass = 0;
         ent.GetOrCreateComponent("EC_Highlight", 2, false);
@@ -370,21 +336,52 @@ ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
     }
     else
     {
-        // Just deselect all entities and return them to original positions.
-        var length = this.entities.length;
-        for (var i = 0; i < length; ++i)
-        {
-            var ent = scene.EntityById(this.entities.pop());
-            ent.placeable.transform = this.originalTransform.pop();
-            ent.rigidbody.mass = 10;
-            ent.highlight.visible = false;
-            this.HighlightActivity(false);
-        }
+        
     }
 }
 
 ObjectGrab.prototype.HandleMouseLeftReleased = function(event)
 {
+    // If objects are grabbed and on top of the portal transfer them there.
+    if (this.targetPortal)
+    {
+        var length = this.entities.length;
+        for (var i = 0; i < length; ++i)
+        {
+            var entity = scene.EntityById(this.entities.pop());
+            var transform = this.originalTransform.pop();
+            entity.placeable.transform = transform;
+            entity.rigidbody.mass = 10;
+            entity.highlight.visible = false;
+            this.HighlightActivity(false);
+            this.targetPortal.Exec(1, "Collision",entity.id, scene.name, transform.scale.x);
+        }
+    }
+    else if (this.trashcan)
+    {
+        var length = this.entities.length;
+        for (var i = 0; i < length; ++i)
+        {
+            var entity = scene.EntityById(this.entities.pop());
+            var transform = this.originalTransform.pop();
+            entity.placeable.transform = transform;
+            entity.rigidbody.mass = 10;
+            entity.highlight.visible = false;
+            this.HighlightActivity(false);
+            scene.RemoveEntity(entity.id, 2);
+            this.trashcan = 0;
+        }
+    }
+    // Just deselect all entities and return them to original positions.
+    var length = this.entities.length;
+    for (var i = 0; i < length; ++i)
+    {
+        var ent = scene.EntityById(this.entities.pop());
+        ent.placeable.transform = this.originalTransform.pop();
+        ent.rigidbody.mass = 10;
+        ent.highlight.visible = false;
+        this.HighlightActivity(false);
+    }
 }
 // </MOUSE HANDLERS>
 
