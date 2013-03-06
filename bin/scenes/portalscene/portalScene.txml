@@ -53,13 +53,6 @@
    <attribute value="camdisplaywall1" name="name"/>
    <attribute value="" name="description"/>
   </component>
-  <!--component type="EC_Script" sync="true" name="PortalScript">
-   <attribute value="doorportal.js" name="Script ref"/>
-   <attribute value="true" name="Run on load"/>
-   <attribute value="0" name="Run mode"/>
-   <attribute value="PortalScript" name="Script application name"/>
-   <attribute value="" name="Script class name"/>
-  </component-->
  </entity>
  <entity id="3" sync="1">
  <component type="EC_Placeable" sync="true">

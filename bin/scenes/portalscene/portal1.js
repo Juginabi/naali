@@ -8,6 +8,7 @@ function Portal(entity, comp)
     this.cam = null;
     this.conname;
     this.connected = false;
+    this.objectGrabbed = 0;
 
     if (this.isServer)
     {
@@ -53,7 +54,9 @@ Portal.prototype.ClientInit = function()
     this.me.Action("Collision").Triggered.connect(this, this.handleCollision);
     //me.Action("makeConnection").Triggered.connect(this, this.makeConnection);
     //me.Action("update").Triggered.connect(this, this.ClientUpdateView);
-    //me.Action("objectGrabbed").Triggered.connect(this, this.setObjectGrabStatus);
+    
+    // Entity action handlers
+    this.me.Action("objectGrabbed").Triggered.connect(this, this.setObjectGrabStatus);
     //frame.Updated.connect(this, this.ClientUpdateView);
 }
 
@@ -128,6 +131,8 @@ Portal.prototype.OnScriptObjectDestroyed = function()
         }
         this.me.Action("MouseRightPress").Triggered.disconnect(this, this.MouseRightPressed);
         this.me.Action("MouseLeftPress").Triggered.disconnect(this, this.MouseLeftPressed);
+        // Entity actions
+        this.me.Action("objectGrabbed").Triggered.disconnect(this, this.setObjectGrabStatus);
     }
     else
     {
@@ -157,6 +162,9 @@ Portal.prototype.MouseRightPressed = function(event)
 {
     print("[Portal application] Mouse right pressed in " + this.me.name);
 
+    if (this.objectGrabbed == 1)
+        return;
+
     var otherScene = framework.Scene().GetScene(this.conname);
     if (!otherScene)
         return;
@@ -183,6 +191,9 @@ Portal.prototype.disconnection = function(scene)
 Portal.prototype.MouseLeftPressed = function(event)
 {
     print("[Portal application] Mouse left pressed in " + this.me.name);
+
+    if (this.objectGrabbed == 1)
+        return;
 
     // This disconnect should be disabled if multiple simultaneous connections are wanted with multiconnection feature.a
     //console.ExecuteCommand("Disconnect()");
@@ -400,6 +411,12 @@ Portal.prototype.handleCollision = function(entityID, sceneName, scale)
             }
         }
     }
+}
+
+Portal.prototype.setObjectGrabStatus = function(state)
+{
+    print("[Portal application] Set object grab status: " + state);
+    this.objectGrabbed = state;
 }
 
 

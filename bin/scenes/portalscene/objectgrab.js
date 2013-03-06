@@ -6,12 +6,15 @@ if (!server.IsRunning() && !framework.IsHeadless())
 
 function ObjectGrab(entity, comp)
 {
+    this.prevPosX = 0;
+    this.prevPosY = 0;
     this.me = entity;
     this.selectedId = -1;
     this.entities = [];
+    this.entityDist = 0;
     //this.originalPosition = new float3();
     //this.originalOrientation = new Quat();
-    this.originalTransform = new Array();
+    this.originalTransform = [];
     this.objectActive = false;
     this.animDirection = true;
     this.targetPortal = 0;
@@ -116,7 +119,7 @@ ObjectGrab.prototype.ReleaseSelection = function()
 // it's selected
 ObjectGrab.prototype.UpdateSelectionAnimation = function()
 {
-    var entity = scene.GetEntity(this.selectedId);
+    var entity = scene.GetEntity(this.entities[0]);
     if(entity == null)
         return;
 
@@ -127,125 +130,75 @@ ObjectGrab.prototype.UpdateSelectionAnimation = function()
     entity.placeable.transform = transform;
 }
 
-// Should be connected to selected input method
-// Tested to work with mouse, should work with touch but might not work with
-// freehand gestures.
-ObjectGrab.prototype.MoveSelectedObject = function(deltaX, deltaY)
-{
-    var cameraId = GetActiveCameraId();
-    if(cameraId == -1)
-        return;
-
-    var cameraEntity = scene.GetEntity(cameraId);
-    var selectedEntity = scene.GetEntity(this.selectedId);
-    if(cameraEntity == null || selectedEntity == null)
-        return;
-
-    var mainWindow = ui.MainWindow();
-    var windowWidth = mainWindow.width;
-    var windowHeight = mainWindow.height;
-
-    var movedX = deltaX * (1 / windowWidth);
-    var movedY = deltaY * (1 / windowHeight);
-
-    var fov = cameraEntity.camera.verticalFov;
-    var cameraPosition = cameraEntity.placeable.transform.pos;
-    var selectedPosition = selectedEntity.placeable.transform.pos;
-
-    var distance = cameraPosition.Distance(selectedPosition);
-
-    var width = (Math.tan(fov/2) * distance) * 2;
-    var height = (windowHeight*width) / windowWidth;
-
-    var moveFactor = windowWidth / windowHeight;
-
-    var amountX = width * movedX * moveFactor;
-    var amountY = height * movedY * moveFactor;
-    var newPosition = selectedPosition.Add(cameraEntity.placeable.WorldOrientation().Mul(new float3(amountX, -amountY, 0)));
-
-    var oldTransform = selectedEntity.placeable.transform;
-    oldTransform.pos = newPosition;
-    selectedEntity.placeable.transform = oldTransform;
-}
-
 // <MOUSE HANDLERS>
 ObjectGrab.prototype.HandleMouseMove = function(event)
 {
-    // If no entities are selected, ignore this event.
-    if (this.entities.length != 0)
+    var cam = scene.EntityByName("FreeLookCamera").camera;
+    if (cam)
     {
-        this.trashcan = 0;
-        var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xffffffff);
-        // Check if user is pointing on any of the portals
-        if (raycastResult.entity != null && raycastResult.entity.id > 1 && raycastResult.entity.id < 6)
-        {
-            // Set pointed portal as target portal.
-            if (this.targetPortal)
-                this.targetPortal.Exec(1, "objectGrabbed", 0);
-            this.targetPortal = scene.EntityById(raycastResult.entity.id);
-            this.targetPortal.Exec(1, "objectGrabbed", 1);
+        var mainWindow = ui.MainWindow();
+        var windowWidth = mainWindow.width;
+        var windowHeight = mainWindow.height;
 
-            var entity = null;
-            var len = this.entities.length;
-            // Set all chosen entities to be placed over portal
-            for (var i = 0; i < len; ++i)
-            {
-                entity = scene.EntityById(this.entities[i]);
-                var transform = entity.placeable.transform;
-                transform.pos = raycastResult.entity.placeable.transform.pos;
-                transform.pos.z -= 1;
-                entity.placeable.transform = transform;
-            }
-        }
-        else if (raycastResult.entity != null && raycastResult.entity.id == 19)
+        var ray = cam.GetMouseRay(event.x/windowWidth, event.y/windowHeight);
+        if (ray)
         {
-            if (this.targetPortal)
-                this.targetPortal.Exec(1, "objectGrabbed", 0);
-            this.targetPortal = 0;
-            this.trashcan = scene.EntityById(raycastResult.entity.id);
-            var entity = null;
-            var len = this.entities.length;
-            // Set all chosen entities to be placed over portal
-            for (var i = 0; i < len; ++i)
-            {
-                entity = scene.EntityById(this.entities[i]);
-                var transform = entity.placeable.transform;
-                transform.pos = raycastResult.entity.placeable.transform.pos;
-                transform.pos.y += 0.5;
-                entity.placeable.transform = transform;
-            }
-        }
-
-        // If cursor is pointed on floor, reset entity positions to starting positions and set target portals to null.
-        else if (raycastResult.entity != null && raycastResult.entity.id == 11)
-        {
-            if (this.targetPortal)
-                this.targetPortal.Exec(1, "objectGrabbed", 0);
-            this.targetPortal = 0;
-            this.trashcan = 0;
-            var len = this.entities.length;
-            for (var i = 0; i < len; ++i)
+            for (var i = 0; i < this.entities.length; ++i)
             {
                 var entity = scene.EntityById(this.entities[i]);
-                var transform = entity.placeable.transform;
-                transform = this.originalTransform[i];
-                entity.placeable.transform = transform;
+                var tf = entity.placeable.transform;
+                // Check what is behind the entity.
+                entity.placeable.selectionLayer = 0xf0000000;
+                var raycastResult = scene.ogre.Raycast(event.x, event.y, 0x0fffffff);
+                var re1 = new RegExp("^camdisplaywall");
+                var re2 = new RegExp("^Trash");
+                if (raycastResult.entity.name.match(re1))
+                {
+                    // Set pointed portal as target portal.
+                    if (this.targetPortal)
+                        this.targetPortal.Exec(1, "objectGrabbed", 0);
+
+                    this.targetPortal = raycastResult.entity;
+                    this.targetPortal.Exec(1, "objectGrabbed", 1);
+                    
+                    tf.pos = raycastResult.entity.placeable.transform.pos;
+                    entity.placeable.transform = tf;
+                }
+                else if (raycastResult.entity.name.match(re2))
+                {
+                    // trashcan
+                    if (this.targetPortal)
+                        this.targetPortal.Exec(1, "objectGrabbed", 0);
+                    this.targetPortal = 0;
+                    this.trashcan = raycastResult.entity;
+                    tf.pos = raycastResult.entity.placeable.transform.pos;
+                    entity.placeable.transform = tf;
+                }
+                else
+                {
+                    if (this.targetPortal)
+                        this.targetPortal.Exec(1, "objectGrabbed", 0);
+                    this.targetPortal = 0;
+                    this.trashcan = 0;
+                    // Distance from viewport
+                    var distance = tf.pos.Distance(ray.pos);
+                    var uusPaikka = ray.dir.Mul(11);
+                    // Set object position to mouse cursor
+                    var positio = uusPaikka.Add(ray.pos);
+                    tf.pos = positio;
+                    entity.placeable.transform = tf;
+                } 
+            }
+            if (this.entities.length == 0)
+            {
+                if (this.targetPortal)
+                    this.targetPortal.Exec(1, "objectGrabbed", 0);
+                this.targetPortal = 0;
             }
         }
     }
-    else
-    {
-        if (this.targetPortal)
-            this.targetPortal.Exec(1, "objectGrabbed", 0);
-        this.targetPortal = 0;
-    }
-}
-ObjectGrab.prototype.timerMethod = function()
-{
-    print("Timer!");
-    this.timer.singleShot = false;
-    this.timer.timeout.connect(this, this.timerMethod);
-    this.timer.start(1000);
+    this.prevPosX = event.x;
+    this.prevPosY = event.y;
 }
 
 ObjectGrab.prototype.HandleMouseRightPressed = function(event)
@@ -381,7 +334,11 @@ ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
             if (this.entities[i] == entityID)
             {
                 var entity = scene.EntityById(this.entities.splice(i,1));
-                var transform = this.originalTransform.splice(i,1);
+                var position = this.originalTransform[i].pos;
+                this.originalTransform.splice(i,1);
+                var oldTf = entity.placeable.transform;
+                oldTf.pos = position;
+                entity.placeable.transform = oldTf;
                 entity.RemoveComponent("EC_Highlight");
                 this.HighlightActivity(false);
                 return;
@@ -401,6 +358,7 @@ ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
         }
         // Select chosen entity and activate highlight component on it.
         var ent = scene.EntityById(entityID);
+        print("Pushing trans: " + ent.placeable.transform);
         this.originalTransform.push(ent.placeable.transform);
         ent.rigidbody.mass = 0;
         ent.GetOrCreateComponent("EC_Highlight", 2, false);
