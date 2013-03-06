@@ -185,6 +185,8 @@ ObjectGrab.prototype.HandleMouseMove = function(event)
                     var uusPaikka = ray.dir.Mul(11);
                     // Set object position to mouse cursor
                     var positio = uusPaikka.Add(ray.pos);
+                    if (positio.y < 0.6)
+                        positio.y = 0.6
                     tf.pos = positio;
                     entity.placeable.transform = tf;
                 } 
