@@ -136,7 +136,7 @@ ObjectGrab.prototype.OnTouchUpdate = function(event)
                 var tf = entity.placeable.transform;
                 // Check what is behind the entity.
                 entity.placeable.selectionLayer = 0xf0000000;
-                var raycastResult = scene.ogre.Raycast(event.x, event.y, 0x0fffffff);
+                var raycastResult = scene.ogre.Raycast(this.touchPoints[0].pos().x(), this.touchPoints[0].pos().y(), 0x0fffffff);
                 var re1 = new RegExp("^camdisplaywall");
                 var re2 = new RegExp("^Trash");
                 if (raycastResult.entity.name.match(re1))
