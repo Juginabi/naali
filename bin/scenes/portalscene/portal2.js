@@ -162,6 +162,7 @@ PortalManager.prototype.OnTouchUpdate = function(event)
 
 PortalManager.prototype.OnTouchEnd = function(event)
 {
+    print("[Portal Manager] TouchEnd.");
     var directionDown = false;
     for (var i = 0; i < this.touchPoints.length; ++i)
     {
@@ -177,19 +178,15 @@ PortalManager.prototype.OnTouchEnd = function(event)
         {
             if (this.currentEntity != null && this.currentEntity.id == result.entity.id)
             {
-                directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);       
+                directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);
+                if (directionDown)
+                    print("[Portal Manager] TouchEnd moving down.");
+                else
+                    print("[Portal Manager] TouchEnd moving up.");       
             }
         }
     }
     
-    if (this.currentEntity != null && this.currentEntity.id > 11 && this.currentEntity.id < 19)
-    {
-        print("Releasing entity: " + this.currentEntity.name);
-        this.currentEntity.rigidbody.mass = 10;
-        var transform = this.currentEntity.placeable.transform;
-        transform = this.originalTransform;
-        this.currentEntity.placeable.transform = transform;
-    }
     this.currentEntity = null;
 }
 
