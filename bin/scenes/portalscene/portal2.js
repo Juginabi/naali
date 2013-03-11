@@ -151,11 +151,11 @@ PortalManager.prototype.OnTouchEnd = function(event)
 
     diff = this.startTouchY - this.lastTouchY;
     print("Difference: " + diff + ", " + this.startTouchY + ", " + this.lastTouchY);
-    if (diff < -5)
+    if (diff < -15)
         directionDown = true;
             
-    this.lastTouchX = this.touchPoints[i].pos().x();
-    this.lastTouchY = this.touchPoints[i].pos().y();
+    this.lastTouchX = this.touchPoints[0].pos().x();
+    this.lastTouchY = this.touchPoints[0].pos().y();
 
     if (this.currentEntity != null && this.currentEntity.id > 1 && this.currentEntity.id < 6)
     {
