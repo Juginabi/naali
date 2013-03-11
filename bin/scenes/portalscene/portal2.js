@@ -9,6 +9,14 @@ function PortalManager(entity, comp)
     this.touchPoints = [];
     this.portals = [];
 
+    // Touch related
+    this.startTouchX = 0;
+    this.startTouchY = 0;
+    this.lastTouchX = 0;
+    this.lastTouchY = 0;
+    this.currentEntity = null;
+    this.originalTransform = null;
+
     this.isServer = server.IsRunning();
     this.me = entity;
 
@@ -59,9 +67,9 @@ PortalManager.prototype.ClientInit = function()
     input.TopLevelInputContext().MouseLeftPressed.connect(this, this.MouseLeftPress);
     input.TopLevelInputContext().MouseRightPressed.connect(this, this.MouseRightPress);
   	// Touch input handlers
-    // input.TouchBegin.connect(this, this.OnTouchBegin);
-    // input.TouchUpdate.connect(this, this.OnTouchUpdate);
-    // input.TouchEnd.connect(this, this.OnTouchEnd);
+    input.TouchBegin.connect(this, this.OnTouchBegin);
+    input.TouchUpdate.connect(this, this.OnTouchUpdate);
+    input.TouchEnd.connect(this, this.OnTouchEnd);
 }
 
 PortalManager.prototype.MouseLeftPress = function(event)
@@ -100,6 +108,89 @@ PortalManager.prototype.MouseRightPress = function(event)
         	}
         }
     }
+}
+
+PortalManager.prototype.OnTouchBegin = function(event)
+{
+	print("[Portal Manager] OnTouchBegin");
+
+	this.touchPoints = event.touchPoints();
+
+    for (var i = 0; i < this.touchPoints.length; ++i)
+    {
+        this.startTouchX = this.touchPoints[i].pos().x();
+        this.startTouchY = this.touchPoints[i].pos().y();
+        this.currentEntity = this.GetTargetedEntity(this.startTouchX, this.startTouchY);   
+        this.originalTransform = this.currentEntity.placeable.transform;    
+    }
+}
+
+PortalManager.prototype.GetTargetedEntity = function(x,y)
+{
+    var raycastResult = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
+    if (raycastResult.entity != null)
+    {
+        return raycastResult.entity;
+    }
+    return null;
+}
+
+PortalManager.prototype.OnTouchUpdate = function(event)
+{
+	// print("[Portal Manager] OnTouchUpdate");
+
+	// this.touchPoints = event.touchPoints();
+
+ //    for (var i = 0; i < this.touchPoints.length; ++i)
+ //    {
+ //        this.lastTouchX = this.touchPoints[i].pos().x();
+ //        this.lastTouchY = this.touchPoints[i].pos().y();
+ //    }
+ //    var result = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
+ //    if (result.entity != null)
+ //    {
+ //        if (result.entity.id > 1 && result.entity.id < 6)
+ //        {
+ //            if (this.currentEntity != null && this.currentEntity.id > 11 && this.currentEntity.id < 19)
+ //            {
+ //                this.currentEntity.rigidbody.mass = 0;
+ //                this.currentEntity.placeable.SetPosition(result.entity.placeable.transform.pos);
+ //            }
+ //        }
+ //    }
+}
+
+PortalManager.prototype.OnTouchEnd = function(event)
+{
+    var directionDown = false;
+    for (var i = 0; i < this.touchPoints.length; ++i)
+    {
+        if (this.startTouchY < this.touchPoints[i].pos().y())
+            directionDown = true;
+        this.lastTouchX = this.touchPoints[i].pos().x();
+        this.lastTouchY = this.touchPoints[i].pos().y();
+    }
+    var result = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
+    if (result.entity != null)
+    {
+        if (result.entity.id > 1 && result.entity.id < 6)
+        {
+            if (this.currentEntity != null && this.currentEntity.id == result.entity.id)
+            {
+                directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);       
+            }
+        }
+    }
+    
+    if (this.currentEntity != null && this.currentEntity.id > 11 && this.currentEntity.id < 19)
+    {
+        print("Releasing entity: " + this.currentEntity.name);
+        this.currentEntity.rigidbody.mass = 10;
+        var transform = this.currentEntity.placeable.transform;
+        transform = this.originalTransform;
+        this.currentEntity.placeable.transform = transform;
+    }
+    this.currentEntity = null;
 }
 
 PortalManager.prototype.OnScriptObjectDestroyed = function()
