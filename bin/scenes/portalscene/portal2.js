@@ -59,9 +59,9 @@ PortalManager.prototype.ClientInit = function()
     input.TopLevelInputContext().MouseLeftPressed.connect(this, this.MouseLeftPress);
     input.TopLevelInputContext().MouseRightPressed.connect(this, this.MouseRightPress);
   	// Touch input handlers
-    input.TouchBegin.connect(this, this.OnTouchBegin);
-    input.TouchUpdate.connect(this, this.OnTouchUpdate);
-    input.TouchEnd.connect(this, this.OnTouchEnd);
+    // input.TouchBegin.connect(this, this.OnTouchBegin);
+    // input.TouchUpdate.connect(this, this.OnTouchUpdate);
+    // input.TouchEnd.connect(this, this.OnTouchEnd);
 }
 
 PortalManager.prototype.MouseLeftPress = function(event)
