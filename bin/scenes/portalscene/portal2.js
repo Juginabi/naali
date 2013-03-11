@@ -120,7 +120,8 @@ PortalManager.prototype.OnTouchBegin = function(event)
     {
         this.startTouchX = this.touchPoints[i].pos().x();
         this.startTouchY = this.touchPoints[i].pos().y();
-        this.currentEntity = this.GetTargetedEntity(this.startTouchX, this.startTouchY);   
+        this.currentEntity = this.GetTargetedEntity(this.startTouchX, this.startTouchY);  
+        print("Touch start at: " + this.currentEntity.name); 
         this.originalTransform = this.currentEntity.placeable.transform;    
     }
 }
@@ -162,7 +163,6 @@ PortalManager.prototype.OnTouchUpdate = function(event)
 
 PortalManager.prototype.OnTouchEnd = function(event)
 {
-    print("[Portal Manager] TouchEnd.");
     var directionDown = false;
     for (var i = 0; i < this.touchPoints.length; ++i)
     {
@@ -174,18 +174,12 @@ PortalManager.prototype.OnTouchEnd = function(event)
     var result = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
     if (result.entity != null)
     {
-        print("[Portal Manager] Result not null.");
+        print("Touch end at: " + result.entity.name); 
         if (result.entity.id > 1 && result.entity.id < 6)
         {
-            print("[Portal Manager] Result " + result.entity.name);
             if (this.currentEntity != null && this.currentEntity.id == result.entity.id)
             {
-                print("[Portal Manager] Result is the same");
-                directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);
-                if (directionDown)
-                    print("[Portal Manager] TouchEnd moving down.");
-                else
-                    print("[Portal Manager] TouchEnd moving up.");       
+                directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);      
             }
         }
     }
