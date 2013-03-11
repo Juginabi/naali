@@ -160,8 +160,6 @@ Portal.prototype.leaveView = function()
 
 Portal.prototype.MouseRightPressed = function(event)
 {
-    print("[Portal application] Mouse right pressed in " + this.me.name);
-
     if (this.objectGrabbed == 1)
         return;
 
@@ -173,7 +171,6 @@ Portal.prototype.MouseRightPressed = function(event)
     this.rtt = null;
     this.me.mesh.SetMaterial(1, "portalMaterial.100.material");
     this.me.mesh.meshRef = this.me.mesh.meshRef;
-    print("Destroying " + portalCam.name + " which id is: " + portalCam.id);
     otherScene.RemoveEntity(portalCam.id);
     client.Logout(this.conname);
 }
@@ -182,7 +179,6 @@ Portal.prototype.disconnection = function(scene)
 {
     if (scene == this.conname)
     {
-        print("Disconnection from " + scene);
         this.connected = false;
         client.Disconnected.disconnect(this, this.disconnection);
     }
@@ -190,8 +186,6 @@ Portal.prototype.disconnection = function(scene)
 
 Portal.prototype.MouseLeftPressed = function(event)
 {
-    print("[Portal application] Mouse left pressed in " + this.me.name);
-
     if (this.objectGrabbed == 1)
         return;
 
@@ -248,15 +242,12 @@ Portal.prototype.MouseLeftPressed = function(event)
 
 Portal.prototype.newConnection = function(scenename)
 {
-    print("[Portal application] executing init in 3 seconds...");
     this.connected = true;
     frame.DelayedExecute(3).Triggered.connect(this, this.init); //XXX dirty hack
 }
 
 Portal.prototype.init = function()
 {
-    print("[Portal application] Connection init " + this.me.name);
-
     this.connected = true;
 
     var otherScene = framework.Scene().GetScene(this.conname);
@@ -299,7 +290,6 @@ Portal.prototype.init = function()
     var Entity = otherScene.EntityByName("3D-UI-switch");
     if (!Entity)
     {
-        print("No 3d UI switch!");
         Entity = otherScene.CreateEntity(otherScene.NextFreeIdLocal(), ["EC_Mesh", "EC_Name", "EC_Script", "EC_Placeable"], 2, false, false);
         //Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Mesh", "EC_Name", "EC_Script", "EC_Placeable"]);
         Entity.name = "3D-UI-switch";
@@ -354,7 +344,6 @@ Portal.prototype.createCamera = function(otherScene)
 
 Portal.prototype.handleCollision = function(entityID, sceneName, scale)
 {
-    print("scene: " + sceneName + ", entity: " + framework.Scene().GetScene(sceneName).EntityById(entityID).name + ", conName: " + this.conname); 
     var ent = framework.Scene().GetScene(sceneName).EntityById(entityID);
     if (ent)
     {
@@ -412,7 +401,6 @@ Portal.prototype.handleCollision = function(entityID, sceneName, scale)
 
 Portal.prototype.setObjectGrabStatus = function(state)
 {
-    print("[Portal application] Set object grab status: " + state);
     this.objectGrabbed = state;
 }
 

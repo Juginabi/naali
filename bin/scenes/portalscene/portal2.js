@@ -112,8 +112,6 @@ PortalManager.prototype.MouseRightPress = function(event)
 
 PortalManager.prototype.OnTouchBegin = function(event)
 {
-	print("[Portal Manager] OnTouchBegin");
-
 	this.touchPoints = event.touchPoints();
 
     for (var i = 0; i < this.touchPoints.length; ++i)
@@ -121,7 +119,6 @@ PortalManager.prototype.OnTouchBegin = function(event)
         this.startTouchX = this.touchPoints[i].pos().x();
         this.startTouchY = this.touchPoints[i].pos().y();
         this.currentEntity = this.GetTargetedEntity(this.startTouchX, this.startTouchY);  
-        print("Touch start at: " + this.currentEntity.name); 
         this.originalTransform = this.currentEntity.placeable.transform;    
     }
 }
@@ -138,27 +135,7 @@ PortalManager.prototype.GetTargetedEntity = function(x,y)
 
 PortalManager.prototype.OnTouchUpdate = function(event)
 {
-	// print("[Portal Manager] OnTouchUpdate");
 
-	// this.touchPoints = event.touchPoints();
-
- //    for (var i = 0; i < this.touchPoints.length; ++i)
- //    {
- //        this.lastTouchX = this.touchPoints[i].pos().x();
- //        this.lastTouchY = this.touchPoints[i].pos().y();
- //    }
- //    var result = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
- //    if (result.entity != null)
- //    {
- //        if (result.entity.id > 1 && result.entity.id < 6)
- //        {
- //            if (this.currentEntity != null && this.currentEntity.id > 11 && this.currentEntity.id < 19)
- //            {
- //                this.currentEntity.rigidbody.mass = 0;
- //                this.currentEntity.placeable.SetPosition(result.entity.placeable.transform.pos);
- //            }
- //        }
- //    }
 }
 
 PortalManager.prototype.OnTouchEnd = function(event)
@@ -166,25 +143,15 @@ PortalManager.prototype.OnTouchEnd = function(event)
     var directionDown = false;
     for (var i = 0; i < this.touchPoints.length; ++i)
     {
-        if (this.startTouchY < this.touchPoints[i].pos().y())
+        if ((this.startTouchY - this.touchPoints[i].pos().y()) < -5)
             directionDown = true;
         this.lastTouchX = this.touchPoints[i].pos().x();
         this.lastTouchY = this.touchPoints[i].pos().y();
     }
-    var result = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
-    if (result.entity != null)
+    if (this.currentEntity.id > 1 && this.currentEntity.id < 6)
     {
-        print("Touch end at: " + result.entity.name); 
-        if (result.entity.id > 1 && result.entity.id < 6)
-        {
-            if (this.currentEntity != null && this.currentEntity.id == result.entity.id)
-            {
-                directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);      
-            }
-        }
+        directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);      
     }
-    else
-        print("[Portal Manager] Result was null!");
     
     this.currentEntity = null;
 }
