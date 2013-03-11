@@ -174,10 +174,13 @@ PortalManager.prototype.OnTouchEnd = function(event)
     var result = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
     if (result.entity != null)
     {
+        print("[Portal Manager] Result not null.");
         if (result.entity.id > 1 && result.entity.id < 6)
         {
+            print("[Portal Manager] Result " + result.entity.name);
             if (this.currentEntity != null && this.currentEntity.id == result.entity.id)
             {
+                print("[Portal Manager] Result is the same");
                 directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);
                 if (directionDown)
                     print("[Portal Manager] TouchEnd moving down.");
@@ -186,6 +189,8 @@ PortalManager.prototype.OnTouchEnd = function(event)
             }
         }
     }
+    else
+        print("[Portal Manager] Result was null!");
     
     this.currentEntity = null;
 }
