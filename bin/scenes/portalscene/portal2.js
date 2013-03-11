@@ -77,7 +77,7 @@ PortalManager.prototype.MouseLeftPress = function(event)
 	print("[Portal Manager] MouseLeftPress");
 
 	// Get entity from mouseclick location.
-    var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xffffffff);
+    var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xFFFFFFFF);
     if(raycastResult.entity != null)
     {
         for (var i = 0; i < this.portals.length; ++i )
@@ -96,7 +96,7 @@ PortalManager.prototype.MouseRightPress = function(event)
 	print("[Portal Manager] MouseRightPress");	
 
     // Get entity from mouseclick location.
-    var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xffffffff);
+    var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xFFFFFFFF);
     if(raycastResult.entity != null)
     {
         for (var i = 0; i < this.portals.length; ++i )
@@ -125,7 +125,7 @@ PortalManager.prototype.OnTouchBegin = function(event)
 
 PortalManager.prototype.GetTargetedEntity = function(x,y)
 {
-    var raycastResult = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
+    var raycastResult = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY, 0xFFFFFFFF);
     if (raycastResult.entity != null)
     {
         return raycastResult.entity;
@@ -151,7 +151,7 @@ PortalManager.prototype.OnTouchEnd = function(event)
 
     diff = this.startTouchY - this.lastTouchY;
     print("Difference: " + diff + ", " + this.startTouchY + ", " + this.lastTouchY);
-    if (diff < -15)
+    if (diff < -50)
         directionDown = true;
             
     this.lastTouchX = this.touchPoints[0].pos().x();

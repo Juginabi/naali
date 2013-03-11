@@ -65,8 +65,6 @@ ObjectGrab.prototype.CreateInput = function()
 
 ObjectGrab.prototype.OnTouchBegin = function(event)
 {
-    print("[ObjectGrab] OnTouchBegin");
-
     this.touchPoints = event.touchPoints();
 
     // restrict grabbing of objects to specific items in the scene
@@ -116,8 +114,6 @@ ObjectGrab.prototype.OnTouchBegin = function(event)
 
 ObjectGrab.prototype.OnTouchUpdate = function(event)
 {
-    print("[ObjectGrab] OnTouchUpdate");
-
     this.touchPoints = event.touchPoints();
 
     var cam = scene.EntityByName("FreeLookCamera").camera;
@@ -190,8 +186,6 @@ ObjectGrab.prototype.OnTouchUpdate = function(event)
 
 ObjectGrab.prototype.OnTouchEnd = function(event)
 {
-    print("[ObjectGrab] OnTouchEnd");
-
     // If objects are grabbed and on top of the portal transfer them there.
     if (this.targetPortal)
     {
@@ -232,36 +226,6 @@ ObjectGrab.prototype.OnTouchEnd = function(event)
         ent.highlight.visible = false;
         this.HighlightActivity(false);
     }
-
-    // var directionDown = false;
-    // for (var i = 0; i < this.touchPoints.length; ++i)
-    // {
-    //     if (this.startTouchY < this.touchPoints[i].pos().y())
-    //         directionDown = true;
-    //     this.lastTouchX = this.touchPoints[i].pos().x();
-    //     this.lastTouchY = this.touchPoints[i].pos().y();
-    // }
-    // var result = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY);
-    // if (result.entity != null)
-    // {
-    //     if (result.entity.id > 1 && result.entity.id < 6)
-    //     {
-    //         if (this.currentEntity != null && this.currentEntity.id == result.entity.id)
-    //         {
-    //             directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);       
-    //         }
-    //     }
-    // }
-    
-    // if (this.currentEntity != null && this.currentEntity.id > 11 && this.currentEntity.id < 19)
-    // {
-    //     print("Releasing entity: " + this.currentEntity.name);
-    //     this.currentEntity.rigidbody.mass = 10;
-    //     var transform = this.currentEntity.placeable.transform;
-    //     transform = this.originalTransform;
-    //     this.currentEntity.placeable.transform = transform;
-    // }
-    // this.currentEntity = null;
 }
 
 // Get entity id as projected through viewport
@@ -361,10 +325,10 @@ ObjectGrab.prototype.HandleMouseMove = function(event)
                 var tf = entity.placeable.transform;
                 // Check what is behind the entity.
                 entity.placeable.selectionLayer = 0xf0000000;
-                var raycastResult = scene.ogre.Raycast(event.x, event.y, 0x0fffffff);
+                var raycastResult = scene.ogre.Raycast(event.x, event.y, 0x0FFFFFFF);
                 var re1 = new RegExp("^camdisplaywall");
                 var re2 = new RegExp("^Trash");
-                if (raycastResult.entity.name.match(re1))
+                if (raycastResult.entity && raycastResult.entity.name.match(re1))
                 {
                     // Set pointed portal as target portal.
                     if (this.targetPortal)
@@ -376,7 +340,7 @@ ObjectGrab.prototype.HandleMouseMove = function(event)
                     tf.pos = raycastResult.entity.placeable.transform.pos;
                     entity.placeable.transform = tf;
                 }
-                else if (raycastResult.entity.name.match(re2))
+                else if (raycastResult.entity && raycastResult.entity.name.match(re2))
                 {
                     // trashcan
                     if (this.targetPortal)

@@ -777,7 +777,7 @@
    <attribute value="" name="Parent bone name"/>
   </component>
  </entity>
- <entity id="23" sync="1">
+ <!--entity id="23" sync="1">
   <component type="EC_Name" sync="true">
    <attribute value="Terrain" name="name"/>
    <attribute value="" name="description"/>
@@ -811,7 +811,7 @@
    <attribute value="-1" name="Collision Layer"/>
    <attribute value="-1" name="Collision Mask"/>
   </component>
- </entity>
+ </entity-->
  <entity id="102" sync="1">
  <component type="EC_Placeable" sync="true">
     <attribute value="5.513641,2,7.16,90.000000,0.000000,180.000000,1.85,0.20,1.85" name="Transform"/>
