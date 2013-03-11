@@ -140,6 +140,7 @@ PortalManager.prototype.OnTouchUpdate = function(event)
 
 PortalManager.prototype.OnTouchEnd = function(event)
 {
+    this.touchPoints = event.touchPoints();
     var directionDown = false;
     for (var i = 0; i < this.touchPoints.length; ++i)
     {
