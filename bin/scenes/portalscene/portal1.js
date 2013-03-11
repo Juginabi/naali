@@ -206,7 +206,6 @@ Portal.prototype.MouseLeftPressed = function(event)
     case "camdisplaywall1":
         if (!this.connected)
         {
-            this.connected = true;
             client.Connected.connect(this, this.newConnection);
             client.Login(ip, 2346,"Testaaja", "pass", "udp");
             this.conname = ip + "-2346-udp";
@@ -217,7 +216,6 @@ Portal.prototype.MouseLeftPressed = function(event)
     case "camdisplaywall2":
         if (!this.connected)
         {
-            this.connected = true;
             client.Connected.connect(this, this.newConnection);
             client.Login(ip, 2347,"Testaaja", "pass", "udp");
             this.conname = ip + "-2347-udp";
@@ -228,7 +226,6 @@ Portal.prototype.MouseLeftPressed = function(event)
     case "camdisplaywall3":
         if (!this.connected)
         {
-            this.connected = true;
             client.Connected.connect(this, this.newConnection);
             client.Login(ip, 2348,"Testaaja", "pass", "udp");
             this.conname = ip + "-2348-udp";
@@ -239,7 +236,6 @@ Portal.prototype.MouseLeftPressed = function(event)
     case "camdisplaywall4":
         if (!this.connected)
         {
-            this.connected = true;
             client.Connected.connect(this, this.newConnection);
             client.Login(ip, 2349,"Testaaja", "pass", "udp");
             this.conname = ip + "-2349-udp";
@@ -253,6 +249,7 @@ Portal.prototype.MouseLeftPressed = function(event)
 Portal.prototype.newConnection = function(scenename)
 {
     print("[Portal application] executing init in 3 seconds...");
+    this.connected = true;
     frame.DelayedExecute(3).Triggered.connect(this, this.init); //XXX dirty hack
 }
 
