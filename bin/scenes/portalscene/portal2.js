@@ -135,21 +135,29 @@ PortalManager.prototype.GetTargetedEntity = function(x,y)
 
 PortalManager.prototype.OnTouchUpdate = function(event)
 {
-
+    this.touchPoints = event.touchPoints();
+    for (var i = 0; i < this.touchPoints.length; ++i)
+    {
+        this.lastTouchX = this.touchPoints[i].pos().x();
+        this.lastTouchY = this.touchPoints[i].pos().y();
+    }
 }
 
 PortalManager.prototype.OnTouchEnd = function(event)
 {
     this.touchPoints = event.touchPoints();
     var directionDown = false;
-    for (var i = 0; i < this.touchPoints.length; ++i)
-    {
-        if ((this.startTouchY - this.touchPoints[i].pos().y()) < -5)
-            directionDown = true;
-        this.lastTouchX = this.touchPoints[i].pos().x();
-        this.lastTouchY = this.touchPoints[i].pos().y();
-    }
-    if (this.currentEntity.id > 1 && this.currentEntity.id < 6)
+    var diff = 0;
+
+    diff = this.startTouchY - this.lastTouchY;
+    print("Difference: " + diff + ", " + this.startTouchY + ", " + this.lastTouchY);
+    if (diff < -5)
+        directionDown = true;
+            
+    this.lastTouchX = this.touchPoints[i].pos().x();
+    this.lastTouchY = this.touchPoints[i].pos().y();
+
+    if (this.currentEntity != null && this.currentEntity.id > 1 && this.currentEntity.id < 6)
     {
         directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);      
     }
