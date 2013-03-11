@@ -57,6 +57,10 @@ ObjectGrab.prototype.CreateInput = function()
     //inputContext.MouseRightPressed.connect(this, this.HandleMouseRightPressed);
     inputContext.KeyPressed.connect(this, this.HandleKeyPressed);
     inputContext.KeyReleased.connect(this, this.HandleKeyPressed);
+
+    input.TouchBegin.connect(this, this.OnTouchBegin);
+    input.TouchUpdate.connect(this, this.OnTouchUpdate);
+    input.TouchEnd.connect(this, this.OnTouchEnd);
 }
 
 ObjectGrab.prototype.OnTouchBegin = function(event)
