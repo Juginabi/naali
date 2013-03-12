@@ -193,12 +193,13 @@ Portal.prototype.MouseLeftPressed = function(event)
 
 Portal.prototype.MouseLeftReleased = function(event)
 {
-    print("DFERP");
+    if (this.objectGrabbed == 1)
+        return;
     // This disconnect should be disabled if multiple simultaneous connections are wanted with multiconnection feature.a
     //console.ExecuteCommand("Disconnect()");
-    //var ip = "130.231.12.112";
+    var ip = "130.231.12.54";
     //var ip = "130.231.12.92";
-    var ip = "127.0.0.1";
+    //var ip = "127.0.0.1";
     switch (this.me.name)
     {
         // These attributes are hardcoded for portalScene.
