@@ -178,7 +178,7 @@ PortalManager.prototype.OnTouchEnd = function(event)
 
     if (this.currentEntity != null && this.currentEntity.id > 1 && this.currentEntity.id < 6)
     {
-        directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftPress", event);      
+        directionDown ? this.currentEntity.Exec(1, "MouseRightPress", event) : this.currentEntity.Exec(1, "MouseLeftRelease", event);      
     }
     
     this.currentEntity = null;
