@@ -170,7 +170,6 @@ PortalManager.prototype.OnTouchEnd = function(event)
     var diff = 0;
 
     diff = this.startTouchY - this.lastTouchY;
-    print("Difference: " + diff + ", " + this.startTouchY + ", " + this.lastTouchY);
     if (diff < -50)
         directionDown = true;
             
