@@ -138,14 +138,15 @@ PortalManager.prototype.OnTouchBegin = function(event)
     {
         this.startTouchX = this.touchPoints[i].pos().x();
         this.startTouchY = this.touchPoints[i].pos().y();
-        this.currentEntity = this.GetTargetedEntity(this.startTouchX, this.startTouchY);  
-        this.originalTransform = this.currentEntity.placeable.transform;    
+        this.currentEntity = this.GetTargetedEntity(this.startTouchX, this.startTouchY);
+        if (this.currentEntity != null)  
+            this.originalTransform = this.currentEntity.placeable.transform;    
     }
 }
 
 PortalManager.prototype.GetTargetedEntity = function(x,y)
 {
-    var raycastResult = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY, 0xFFFFFFFF);
+    var raycastResult = scene.ogre.Raycast(this.lastTouchX, this.lastTouchY, 0xffffffff);
     if (raycastResult.entity != null)
     {
         return raycastResult.entity;
