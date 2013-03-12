@@ -51,9 +51,10 @@ Portal.prototype.ClientInit = function()
     
     this.me.Action("MouseRightPress").Triggered.connect(this, this.MouseRightPressed);
     this.me.Action("MouseLeftPress").Triggered.connect(this, this.MouseLeftPressed);
+    this.me.Action("MouseLeftRelease").Triggered.connect(this, this.MouseLeftReleased);
     this.me.Action("Collision").Triggered.connect(this, this.handleCollision);
     //me.Action("makeConnection").Triggered.connect(this, this.makeConnection);
-    //me.Action("update").Triggered.connect(this, this.ClientUpdateView);
+    //me.Action("update").Trgigered.connect(this, this.ClientUpdateView);
     
     // Entity action handlers
     this.me.Action("objectGrabbed").Triggered.connect(this, this.setObjectGrabStatus);
@@ -84,7 +85,6 @@ Portal.prototype.ClientUpdateView = function(frametime)
     }
     if (otherScene == null)
     {
-        print(this.me.name + " setting material to 100!");
         this.me.mesh.SetMaterial(1, "portalMaterial.100.material");
         this.me.mesh.meshRef = this.me.mesh.meshRef;
         return;
@@ -131,6 +131,7 @@ Portal.prototype.OnScriptObjectDestroyed = function()
         }
         this.me.Action("MouseRightPress").Triggered.disconnect(this, this.MouseRightPressed);
         this.me.Action("MouseLeftPress").Triggered.disconnect(this, this.MouseLeftPressed);
+        this.me.Action("MouseLeftRelease").Triggered.disconnect(this, this.MouseLeftReleased);
         // Entity actions
         this.me.Action("objectGrabbed").Triggered.disconnect(this, this.setObjectGrabStatus);
     }
@@ -188,7 +189,11 @@ Portal.prototype.MouseLeftPressed = function(event)
 {
     if (this.objectGrabbed == 1)
         return;
+}
 
+Portal.prototype.MouseLeftReleased = function(event)
+{
+    print("DFERP");
     // This disconnect should be disabled if multiple simultaneous connections are wanted with multiconnection feature.a
     //console.ExecuteCommand("Disconnect()");
     //var ip = "130.231.12.112";
@@ -237,7 +242,7 @@ Portal.prototype.MouseLeftPressed = function(event)
         else
             client.EmitSwitchScene(ip + "-2349-udp");
         break;
-    }
+    }    
 }
 
 Portal.prototype.newConnection = function(scenename)

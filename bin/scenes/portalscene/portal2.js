@@ -66,6 +66,7 @@ PortalManager.prototype.ClientInit = function()
     // Mouse input handlers
     input.TopLevelInputContext().MouseLeftPressed.connect(this, this.MouseLeftPress);
     input.TopLevelInputContext().MouseRightPressed.connect(this, this.MouseRightPress);
+    input.TopLevelInputContext().MouseLeftReleased.connect(this, this.MouseLeftReleased);
   	// Touch input handlers
     input.TouchBegin.connect(this, this.OnTouchBegin);
     input.TouchUpdate.connect(this, this.OnTouchUpdate);
@@ -87,6 +88,25 @@ PortalManager.prototype.MouseLeftPress = function(event)
         		var entity = scene.EntityById(this.portals[i]);
         		entity.Exec(1, "MouseLeftPress", event);
         	}
+        }
+    }
+}
+
+PortalManager.prototype.MouseLeftReleased = function(event)
+{
+    print("[Portal Manager] MouseLeftRelease");
+
+    // Get entity from mouseclick location.
+    var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xFFFFFFFF);
+    if(raycastResult.entity != null)
+    {
+        for (var i = 0; i < this.portals.length; ++i )
+        {
+            if (raycastResult.entity.id == this.portals[i])
+            {
+                var entity = scene.EntityById(this.portals[i]);
+                entity.Exec(1, "MouseLeftRelease", event);
+            }
         }
     }
 }
