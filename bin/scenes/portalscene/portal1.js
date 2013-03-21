@@ -54,7 +54,7 @@ Portal.prototype.ClientInit = function()
     this.me.Action("MouseLeftRelease").Triggered.connect(this, this.MouseLeftReleased);
     this.me.Action("Collision").Triggered.connect(this, this.handleCollision);
     //me.Action("makeConnection").Triggered.connect(this, this.makeConnection);
-    //me.Action("update").Trgigered.connect(this, this.ClientUpdateView);
+    //me.Action("update").Triggered.connect(this, this.ClientUpdateView);
     
     // Entity action handlers
     this.me.Action("objectGrabbed").Triggered.connect(this, this.setObjectGrabStatus);

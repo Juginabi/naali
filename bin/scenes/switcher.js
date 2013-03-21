@@ -1,6 +1,7 @@
 if (!server.IsRunning())
 {
-    input.TopLevelInputContext().MouseLeftPressed.connect(mouseLeftPress);
+    // input.TopLevelInputContext().MouseLeftPressed.connect(mouseLeftPress);
+    input.TopLevelInputContext().MouseLeftReleased.connect(mouseLeftRelease);
     client.SwitchScene.connect(setVisible);
     frame.Updated.connect(checkParent);
     //input.TouchUpdate.connect(checkParent);
@@ -24,31 +25,36 @@ if (!server.IsRunning())
 
     function mouseLeftPress(event)
     {
-    scene = framework.Scene().MainCameraScene();
-    if (scene.name != "127.0.0.1-2345-udp")
+    
+    } // Function mouseleftpress body ends
+
+    function mouseLeftRelease(event)
     {
-        var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xffffffff);
-        if(raycastResult.entity != null && raycastResult.entity.name == "3D-UI-switch")
+        scene = framework.Scene().MainCameraScene();
+        if (scene.name != "127.0.0.1-2345-udp")
         {
-            var privateScene = framework.Scene().GetScene("127.0.0.1-2345-udp");
-            if (privateScene == null)
-                privateScene = framework.Scene().GetScene("localhost-2345-udp");
-            if (privateScene)
+            var raycastResult = scene.ogre.Raycast(event.x, event.y, 0xffffffff);
+            if(raycastResult.entity != null && raycastResult.entity.name == "3D-UI-switch")
             {
-                print("Changing back to private scene!");
-                client.EmitSwitchScene(privateScene.name);
-                me.ParentScene().EntityByName("3D-UI-switch").placeable.visible = false;
-            }
-            else
-            {
-                print("Logging in back to private scene!");
-                var ip = "127.0.0.1";
-                client.Connected.connect(newCon);
-                client.Login(ip, 2345,"lal", "pass", "udp");
+                var privateScene = framework.Scene().GetScene("127.0.0.1-2345-udp");
+                if (privateScene == null)
+                    privateScene = framework.Scene().GetScene("localhost-2345-udp");
+                if (privateScene)
+                {
+                    print("Changing back to private scene!");
+                    client.EmitSwitchScene(privateScene.name);
+                    me.ParentScene().EntityByName("3D-UI-switch").placeable.visible = false;
+                }
+                else
+                {
+                    print("Logging in back to private scene!");
+                    var ip = "127.0.0.1";
+                    client.Connected.connect(newCon);
+                    client.Login(ip, 2345,"lal", "pass", "udp");
+                }
             }
         }
     }
-    } // Function mouseleftpress body ends
 
     function OnTouchBegin(event)
     {
