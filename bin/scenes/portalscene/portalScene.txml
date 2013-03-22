@@ -408,7 +408,7 @@
  </entity>
  <entity id="13" sync="1">
   <component type="EC_Name" sync="true">
-   <attribute value="PDF" name="name"/>
+   <attribute value="Movable1" name="name"/>
    <attribute value="" name="description"/>
   </component>
   <component type="EC_Placeable" sync="true">
@@ -450,7 +450,7 @@
  </entity>
  <entity id="14" sync="1">
   <component type="EC_Name" sync="true">
-   <attribute value="Word" name="name"/>
+   <attribute value="Movable2" name="name"/>
    <attribute value="" name="description"/>
   </component>
   <component type="EC_Placeable" sync="true">
@@ -492,7 +492,7 @@
  </entity>
  <entity id="15" sync="1">
   <component type="EC_Name" sync="true">
-   <attribute value="PowerPoint" name="name"/>
+   <attribute value="Movable3" name="name"/>
    <attribute value="" name="description"/>
   </component>
   <component type="EC_Placeable" sync="true">
@@ -569,7 +569,7 @@
       <attribute value="false" name="Cast shadows"/>
      </component>
   <component type="EC_Name" sync="true">
-   <attribute value="bird" name="name"/>
+   <attribute value="Movable4" name="name"/>
    <attribute value="" name="description"/>
   </component>
  </entity>
@@ -610,7 +610,7 @@
       <attribute value="false" name="Cast shadows"/>
      </component>
   <component type="EC_Name" sync="true">
-   <attribute value="muistio" name="name"/>
+   <attribute value="Movable5" name="name"/>
    <attribute value="" name="description"/>
   </component>
  </entity>
@@ -651,7 +651,7 @@
       <attribute value="false" name="Cast shadows"/>
      </component>
   <component type="EC_Name" sync="true">
-   <attribute value="Pictures" name="name"/>
+   <attribute value="Movable6" name="name"/>
    <attribute value="" name="description"/>
   </component>
  </entity>
@@ -692,7 +692,7 @@
       <attribute value="false" name="Cast shadows"/>
      </component>
   <component type="EC_Name" sync="true">
-   <attribute value="Microphone" name="name"/>
+   <attribute value="Movable7" name="name"/>
    <attribute value="" name="description"/>
   </component>
  </entity>

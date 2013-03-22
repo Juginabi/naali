@@ -293,12 +293,12 @@ Portal.prototype.init = function()
     client.Connected.disconnect(this, this.newConnection);
     client.Disconnected.connect(this, this.disconnection);
 
-    var Entity = otherScene.EntityByName("3D-UI-switch");
+    var Entity = otherScene.EntityByName("camdisplaywall");
     if (!Entity)
     {
         Entity = otherScene.CreateEntity(otherScene.NextFreeIdLocal(), ["EC_Mesh", "EC_Name", "EC_Script", "EC_Placeable"], 2, false, false);
         //Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Mesh", "EC_Name", "EC_Script", "EC_Placeable"]);
-        Entity.name = "3D-UI-switch";
+        Entity.name = "camdisplaywall";
         Entity.script.scriptRef = new AssetReference("local://switcher.js");
         Entity.script.runOnLoad = true;
         Entity.mesh.meshRef = "portalCylinder.mesh";
@@ -382,12 +382,12 @@ Portal.prototype.handleCollision = function(entityID, sceneName, scale)
                 var oldTransform = Entity.placeable.transform;
                 oldTransform.pos = uusPaikka;
                 oldTransform.scale = ent.placeable.transform.scale;
-                //Entity.placeable.transform = oldTransform;
-                Entity.placeable.SetPosition(oldTransform.pos);
+                Entity.placeable.transform = oldTransform;
+                //Entity.placeable.SetPosition(oldTransform.pos);
 
                 // Set same mesh attributes to a new entity as in the entity dragged to portal
-                Entity.mesh.SetAdjustScale(ent.mesh.GetAdjustScale().Mul(float3(0.5,0.5,0.5)));
-                Entity.mesh.SetAdjustPosition(ent.mesh.GetAdjustPosition().Mul(float3(0.5,0.5,0.5)));
+                Entity.mesh.SetAdjustScale(ent.mesh.GetAdjustScale());
+                Entity.mesh.SetAdjustPosition(ent.mesh.GetAdjustPosition());
                 Entity.mesh.SetAdjustOrientation(ent.mesh.GetAdjustOrientation());
                 Entity.mesh.meshRef = ent.mesh.meshRef;
                 Entity.mesh.meshMaterial = ent.mesh.meshMaterial;
@@ -398,8 +398,9 @@ Portal.prototype.handleCollision = function(entityID, sceneName, scale)
                 // Set rigidbody size and mass.
                 var size = ent.rigidbody.size;
                 Entity.rigidbody.mass = 10;
-                Entity.rigidbody.size = size.Mul(float3(0.5,0.5,0.5));
+                Entity.rigidbody.size = size;
                 Entity.rigidbody.shapeType = ent.rigidbody.shapeType;
+                framework.Scene().GetScene(sceneName).RemoveEntity(entityID);
             }
         }
     }
