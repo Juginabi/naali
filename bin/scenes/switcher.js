@@ -34,12 +34,14 @@ if (!server.IsRunning())
 
     function mouseLeftRelease(event)
     {
+        if (this.me.ParentScene().name != framework.Scene().MainCameraScene().name)
+            return;
         if (objectGrabbed == 1)
         {
             print("ObjectGrabbed still! Returning!");
             return;
         }
-        print("Mouse left release in switcher!");
+        print("Mouse left release in switcher! " + this.me.name);
         scene = framework.Scene().MainCameraScene();
         if (scene.name != "127.0.0.1-2345-udp")
         {
