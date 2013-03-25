@@ -30,6 +30,5 @@ bashtrapKillTerm()
     # Start viewer with valgrind tool memcheck.
     ./Tundra --client --storage scenes/ --connect "127.0.0.1;2345;;;" --config viewer-portals.xml --nocentralwidget --fullscreen
     
-    echo 'Full valgrind logs are stored in '$PWD'/valgrind/logs/'
-    echo 'End of valgrind testdrive.'
+    echo 'End of portal demo!'
     echo ''
