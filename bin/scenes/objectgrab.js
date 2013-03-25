@@ -94,7 +94,7 @@ ObjectGrab.prototype.OnTouchBegin = function(event)
     var entityID = this.GetTargetedEntity(this.touchPoints[0].pos().x(), this.touchPoints[0].pos().y());
     var entity = scene.EntityById(entityID);
     var re1 = new RegExp("^Movable");
-    if (entity.name.match(re1))
+    if (entity && entity.name.match(re1))
     {
         // Check if user selects already selected entity. Deselect it if so.
         //var length = this.entities.length;
@@ -248,7 +248,7 @@ ObjectGrab.prototype.OnTouchEnd = function(event)
     {
         var ent = scene.EntityById(this.entities.pop());
         ent.placeable.transform = this.originalTransform.pop();
-        if (entity.rigidbody)
+        if (ent.rigidbody)
             ent.rigidbody.mass = 10;
         ent.highlight.visible = false;
         this.HighlightActivity(false);
