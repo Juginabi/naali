@@ -378,9 +378,14 @@ Portal.prototype.createCamera = function(otherScene)
     if (Entity)
         return;
 
-    Entity = otherScene.CreateEntity(otherScene.NextFreeId(), ["EC_Name", "EC_Placeable", "EC_Camera", "EC_Script"]);
+    Entity = otherScene.CreateEntity(otherScene.NextFreeId());
 
+    Entity.GetOrCreateComponent("EC_Name", 2, false);
+    Entity.GetOrCreateComponent("EC_Camera", 2, false);
+    Entity.GetOrCreateComponent("EC_Script", 2, false);
+    Entity.GetOrCreateComponent("EC_Placeable", 2, false);
     Entity.name = "PortalCamera-" + this.userName;
+    
     var freelook = otherScene.GetEntityByName("FreeLookCamera");
     var freelookTransform = freelook.placeable.transform;
     var portalCamTransform = Entity.placeable.transform;
@@ -392,6 +397,7 @@ Portal.prototype.createCamera = function(otherScene)
     // Run only on client
     Entity.script.runMode = 1;
     Entity.script.runOnLoad = true;
+    
     var grabApp = scene.EntityByName("ObjectGrabApp");
     grabApp.Exec(1, "NewTargetScene", otherScene.name, Entity.name);
 }
