@@ -13,7 +13,6 @@ function ObjectGrab(entity, comp)
     this.selectedId = -1;
     this.entities = [];
     this.entityDist = 0;
-    this.cameras = {};
     
     // Touch related
     this.startTouchX = 0;
@@ -38,16 +37,8 @@ function ObjectGrab(entity, comp)
         client.Connected.connect(this, this.ClientConnected);
         client.SwitchScene.connect(this, this.ClientSwitchScene);
         client.Disconnected.connect(this, this.ClientDisconnected);
-        this.me.Action("NewTargetScene").Triggered.connect(this, this.NewTargetScene);
         this.CreateInput();
     }
-}
-
-ObjectGrab.prototype.NewTargetScene = function(scene, camera)
-{
-    print(scene + ", " + camera);
-    this.cameras[scene] = camera;
-    print(this.cameras[scene]);
 }
 
 ObjectGrab.prototype.ClientConnected = function(scenename)
@@ -349,7 +340,7 @@ ObjectGrab.prototype.UpdateSelectionAnimation = function()
 // <MOUSE HANDLERS>
 ObjectGrab.prototype.HandleMouseMove = function(event)
 {
-    var cameraEntity = scene.EntityByName(this.cameras[scene.name]);
+    var cameraEntity = scene.EntityByName("PortalCamera");
     var cam = 0;
     if (cameraEntity)
         cam = cameraEntity.camera;

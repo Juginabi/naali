@@ -4,7 +4,6 @@ function Switcher(entity, comp)
 	this.me = entity;
 	this.targetScene = null;
 	this.objectGrabbed = false;
-	this.userName = null;
 	this.mySceneName = "notInitialized";
     this.isServer = server.IsRunning();
 
@@ -21,7 +20,6 @@ function Switcher(entity, comp)
 Switcher.prototype.ClientInit = function()
 {
     // Sidestep to get proper identifier from previous scene
-    this.userName = this.me.name;
     this.me.name = "camdisplaywall";
 
     input.TopLevelInputContext().MouseLeftReleased.connect(this, this.mouseLeftRelease);
@@ -35,7 +33,6 @@ Switcher.prototype.ClientInit = function()
     this.me.Action("objectGrabbed").Triggered.connect(this, this.setObjectGrabStatus);
     this.me.Action("Collision").Triggered.connect(this, this.handleCollision);
 
-   	//this.userName = Math.random();
    	this.mySceneName = this.me.ParentScene().name;
 
     engine.ImportExtension("qt.core");
@@ -53,7 +50,7 @@ Switcher.prototype.checkParent = function(event)
     {
         me.ParentScene().EntityByName("camdisplaywall").placeable.visible = true;
         var parentReference = this.me.placeable.parentRef;
-        parentReference.ref = scene.EntityByName("PortalCamera-" + this.userName);
+        parentReference.ref = scene.EntityByName("PortalCamera");
         this.me.placeable.parentRef = parentReference;
         var matnameBack = "FreeLookCamera_portalBack_tex_mat"; //XXX add mat name getter to EC_RttTarget
         this.me.mesh.SetMaterial(1, matnameBack);
