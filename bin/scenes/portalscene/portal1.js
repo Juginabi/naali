@@ -1,4 +1,4 @@
-
+// Copyright by Center for Internet Excellence, University of Oulu
 function Portal(entity, comp)
 {
     this.isServer = server.IsRunning();
@@ -9,6 +9,7 @@ function Portal(entity, comp)
     this.conname;
     this.connected = false;
     this.objectGrabbed = 0;
+    this.userName;
 
     if (this.isServer)
     {
@@ -48,6 +49,8 @@ Portal.prototype.ClientInit = function()
             this.cam.EntityLeaveView.connect(this, this.leaveView);
         }
     }
+
+    this.userName = Math.random();
     
     this.me.Action("MouseRightPress").Triggered.connect(this, this.MouseRightPressed);
     this.me.Action("MouseLeftPress").Triggered.connect(this, this.MouseLeftPressed);
@@ -101,12 +104,12 @@ Portal.prototype.ClientUpdateView = function(frametime)
     else
     {
         // If there was no avatar camerạ, then get freelook.
-        cam = otherScene.GetEntityByName("PortalCamera");
+        cam = otherScene.GetEntityByName("PortalCamera" + this.userName);
         if (cam == null)
             return;
         cam.GetOrCreateComponent("EC_RttTarget");
         this.rtt = cam.rtttarget;
-        this.rtt.textureName = "PortalCamera_" + this.conname + "_tex";
+        this.rtt.textureName = "PortalCamera-" + this.userName + "_" + this.conname + "_tex";
     }
     // Render to texture resolution
     this.rtt.size_x = 400;
@@ -167,12 +170,17 @@ Portal.prototype.MouseRightPressed = function(event)
     var otherScene = framework.Scene().GetScene(this.conname);
     if (!otherScene)
         return;
-    var portalCam = otherScene.EntityByName("PortalCamera");
+    var portalCam = otherScene.EntityByName("PortalCamera-" + this.userName);
     // Set portal to black color when inactive.
     this.rtt = null;
     this.me.mesh.SetMaterial(1, "portalMaterial.100.material");
     this.me.mesh.meshRef = this.me.mesh.meshRef;
-    otherScene.RemoveEntity(portalCam.id);
+    print(otherScene.RemoveEntity(portalCam.id, 2));
+    frame.DelayedExecute(0.2).Triggered.connect(this, this.logout);
+}
+
+Portal.prototype.logout = function()
+{
     client.Logout(this.conname);
 }
 
@@ -211,7 +219,13 @@ Portal.prototype.MouseLeftReleased = function(event)
             this.conname = ip + "-2346-udp";
         }
         else
+        {
+            client.SwitchScene.connect(this, this.switchscene);
             client.EmitSwitchScene(ip + "-2346-udp");
+            //var camera = framework.Scene().GetScene(this.conname).EntityByName("PortalCamera-" + this.userName).camera;
+            //print("Setting camera PortalCamera-" + this.userName + " active!");
+            //camera.SetActive();
+        }
         break;
     case "camdisplaywall2":
         if (!this.connected)
@@ -221,7 +235,10 @@ Portal.prototype.MouseLeftReleased = function(event)
             this.conname = ip + "-2347-udp";
         }
         else
+        {
+            client.SwitchScene.connect(this, this.switchscene);
             client.EmitSwitchScene(ip + "-2347-udp");
+        }
         break;
     case "camdisplaywall3":
         if (!this.connected)
@@ -231,7 +248,10 @@ Portal.prototype.MouseLeftReleased = function(event)
             this.conname = ip + "-2348-udp";
         }
         else
+        {
+            client.SwitchScene.connect(this, this.switchscene);
             client.EmitSwitchScene(ip + "-2348-udp");
+        }
         break;
     case "camdisplaywall4":
         if (!this.connected)
@@ -241,9 +261,28 @@ Portal.prototype.MouseLeftReleased = function(event)
             this.conname = ip + "-2349-udp";
         }
         else
+        {
+            client.SwitchScene.connect(this, this.switchscene);
             client.EmitSwitchScene(ip + "-2349-udp");
+        }
         break;
     }    
+}
+
+Portal.prototype.switchscene = function(name)
+{
+    print("At switchscene!");
+    client.SwitchScene.disconnect(this, this.switchscene);
+    print("Disconnected switch scene signal!");
+    frame.DelayedExecute(0.1).Triggered.connect(this, this.DelayedSwitch);
+}
+
+Portal.prototype.DelayedSwitch = function(name)
+{
+    print("At delayed switch!");
+    var camera = framework.Scene().GetScene(this.conname).EntityByName("PortalCamera-" + this.userName).camera;
+    //print("Setting camera PortalCamera-" + this.userName + " active!");
+    camera.SetActive();
 }
 
 Portal.prototype.newConnection = function(scenename)
@@ -271,7 +310,7 @@ Portal.prototype.init = function()
     else
     {
         // If there was no avatar camerạ, then get freelook.
-        cam = otherScene.GetEntityByName("PortalCamera");
+        cam = otherScene.GetEntityByName("PortalCamera-" + this.userName);
         if (cam == null)
         {
             print("Got no camera for portal!");
@@ -281,7 +320,7 @@ Portal.prototype.init = function()
             print("Got portal camera!");
         cam.GetOrCreateComponent("EC_RttTarget");
         this.rtt = cam.rtttarget;
-        this.rtt.textureName = "PortalCamera_" + this.conname + "_tex";
+        this.rtt.textureName = "PortalCamera-" + this.userName + "_" + this.conname + "_tex";
     }
     // Render to texture resolution
     this.rtt.size_x = 400;
@@ -298,11 +337,15 @@ Portal.prototype.init = function()
     {
         Entity = otherScene.CreateEntity(otherScene.NextFreeIdLocal(), ["EC_Mesh", "EC_Name", "EC_Script", "EC_Placeable"], 2, false, false);
         //Entity = otherScene.CreateEntity(scene.NextFreeId(), ["EC_Mesh", "EC_Name", "EC_Script", "EC_Placeable"]);
-        Entity.name = "camdisplaywall";
-        Entity.script.scriptRef = new AssetReference("local://switcher.js");
-        Entity.script.runOnLoad = true;
+        Entity.name = this.userName;
+        var script = Entity.script;
+        script.scriptRef = new AssetReference("local://switcherNew.js");
+        script.runOnLoad = true;
+        script.applicationName = "PortalApp";
+        script.className = "PortalApp.Switcher";
+        //Entity.script.runOnLoad = true;
         Entity.mesh.meshRef = "portalCylinder.mesh";
-        var cameraEnt = otherScene.EntityByName("PortalCamera");
+        var cameraEnt = otherScene.EntityByName("PortalCamera-" + this.userName);
         var placeable = Entity.placeable;
 
         placeable.SetParent(cameraEnt,0);
@@ -322,21 +365,21 @@ Portal.prototype.init = function()
         var matnameBack = this.rttBack.textureName + "_mat"; //XXX add mat name getter to EC_RttTarget
         // Since 2.4.1 this does not set the material yet.
         // Need to reapply in switcher.js
-        Entity.mesh.SetMaterial(1, matnameBack); 
-
+        Entity.mesh.SetMaterial(1, matnameBack);
+        Entity.Exec(1, "setName", this.userName);
     }
     cam.camera.SetActive();
 }
 
 Portal.prototype.createCamera = function(otherScene)
 {
-    var Entity = otherScene.EntityByName("PortalCamera");
+    var Entity = otherScene.EntityByName("PortalCamera-" + this.userName);
     if (Entity)
         return;
 
     Entity = otherScene.CreateEntity(otherScene.NextFreeId(), ["EC_Name", "EC_Placeable", "EC_Camera", "EC_Script"]);
 
-    Entity.name = "PortalCamera";
+    Entity.name = "PortalCamera-" + this.userName;
     var freelook = otherScene.GetEntityByName("FreeLookCamera");
     var freelookTransform = freelook.placeable.transform;
     var portalCamTransform = Entity.placeable.transform;
@@ -345,7 +388,11 @@ Portal.prototype.createCamera = function(otherScene)
     Entity.placeable.transform = portalCamTransform;
 
     Entity.script.scriptRef = new AssetReference("freelookcamera.js");
+    // Run only on client
+    Entity.script.runMode = 1;
     Entity.script.runOnLoad = true;
+    var grabApp = scene.EntityByName("ObjectGrabApp");
+    grabApp.Exec(1, "NewTargetScene", otherScene.name, Entity.name);
 }
 
 Portal.prototype.handleCollision = function(entityID, sceneName, scale)
@@ -359,7 +406,7 @@ Portal.prototype.handleCollision = function(entityID, sceneName, scale)
             var camera = null;
             if (!(camera = otherScene.GetEntityByName("AvatarCamera")))
             {
-                if (!(camera = otherScene.GetEntityByName("PortalCamera")))
+                if (!(camera = otherScene.GetEntityByName("PortalCamera-" + this.userName)))
                 {
                     print("No camera found from target scene. Unable to copy entity.")
                     return;

@@ -13,6 +13,7 @@ function ObjectGrab(entity, comp)
     this.selectedId = -1;
     this.entities = [];
     this.entityDist = 0;
+    this.cameras = {};
     
     // Touch related
     this.startTouchX = 0;
@@ -37,8 +38,16 @@ function ObjectGrab(entity, comp)
         client.Connected.connect(this, this.ClientConnected);
         client.SwitchScene.connect(this, this.ClientSwitchScene);
         client.Disconnected.connect(this, this.ClientDisconnected);
+        this.me.Action("NewTargetScene").Triggered.connect(this, this.NewTargetScene);
         this.CreateInput();
     }
+}
+
+ObjectGrab.prototype.NewTargetScene = function(scene, camera)
+{
+    print(scene + ", " + camera);
+    this.cameras[scene] = camera;
+    print(this.cameras[scene]);
 }
 
 ObjectGrab.prototype.ClientConnected = function(scenename)
@@ -50,6 +59,7 @@ ObjectGrab.prototype.ClientConnected = function(scenename)
 ObjectGrab.prototype.ClientSwitchScene = function(scenename)
 {
     // Changes this script to operate with different scene's entities
+    print("Client switch scene " + scenename);
     scene = framework.Scene().GetScene(scenename);
 }
 
@@ -248,7 +258,7 @@ ObjectGrab.prototype.OnTouchEnd = function(event)
     {
         var ent = scene.EntityById(this.entities.pop());
         ent.placeable.transform = this.originalTransform.pop();
-        if (ent.rigidbody)
+        if (entity.rigidbody)
             ent.rigidbody.mass = 10;
         ent.highlight.visible = false;
         this.HighlightActivity(false);
@@ -339,7 +349,7 @@ ObjectGrab.prototype.UpdateSelectionAnimation = function()
 // <MOUSE HANDLERS>
 ObjectGrab.prototype.HandleMouseMove = function(event)
 {
-    var cameraEntity = scene.EntityByName("PortalCamera");
+    var cameraEntity = scene.EntityByName(this.cameras[scene.name]);
     var cam = 0;
     if (cameraEntity)
         cam = cameraEntity.camera;
@@ -401,8 +411,8 @@ ObjectGrab.prototype.HandleMouseMove = function(event)
                     var uusPaikka = ray.dir.Mul(11);
                     // Set object position to mouse cursor
                     var positio = uusPaikka.Add(ray.pos);
-                    if (positio.y < 0.6)
-                        positio.y = 0.6
+                    //if (positio.y < 0.6)
+                    //    positio.y = 0.6
                     tf.pos = positio;
                     entity.placeable.transform = tf;
                 } 
