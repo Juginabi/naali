@@ -97,17 +97,17 @@ Portal.prototype.ClientUpdateView = function(frametime)
     var cam = otherScene.GetEntityByName("AvatarCamera");
     if (cam)
     {
-        cam.GetOrCreateComponent("EC_RttTarget");
+        cam.GetOrCreateComponent("EC_RttTarget", 2, false);
         this.rtt = cam.rtttarget;
         this.rtt.textureName = "AvatarCamera_" + this.conname + "_tex";
     }
     else
     {
         // If there was no avatar camerạ, then get freelook.
-        cam = otherScene.GetEntityByName("PortalCamera" + this.userName);
+        cam = otherScene.GetEntityByName("PortalCamera-" + this.userName);
         if (cam == null)
             return;
-        cam.GetOrCreateComponent("EC_RttTarget");
+        cam.GetOrCreateComponent("EC_RttTarget", 2, false);
         this.rtt = cam.rtttarget;
         this.rtt.textureName = "PortalCamera-" + this.userName + "_" + this.conname + "_tex";
     }
@@ -303,7 +303,7 @@ Portal.prototype.init = function()
     var cam = otherScene.GetEntityByName("AvatarCamera");
     if (cam)
     {
-        cam.GetOrCreateComponent("EC_RttTarget");
+        cam.GetOrCreateComponent("EC_RttTarget", 2, false);
         this.rtt = cam.rtttarget;
         this.rtt.textureName = "AvatarCamera_" + this.conname + "_tex";
     }
@@ -318,7 +318,7 @@ Portal.prototype.init = function()
         }
         else
             print("Got portal camera!");
-        cam.GetOrCreateComponent("EC_RttTarget");
+        cam.GetOrCreateComponent("EC_RttTarget", 2, false);
         this.rtt = cam.rtttarget;
         this.rtt.textureName = "PortalCamera-" + this.userName + "_" + this.conname + "_tex";
     }
@@ -355,7 +355,7 @@ Portal.prototype.init = function()
         old.rot = new float3(-105,29,3);
         placeable.transform = old;
         var portalView = scene.GetEntityByName("FreeLookCamera");
-        portalView.GetOrCreateComponent("EC_RttTarget");
+        portalView.GetOrCreateComponent("EC_RttTarget", 2, false);
         this.rttBack = portalView.rtttarget;
         this.rttBack.textureName = "FreeLookCamera_portalBack_tex";
         this.rttBack.size_x = 400;
