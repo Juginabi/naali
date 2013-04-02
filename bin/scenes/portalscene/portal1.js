@@ -279,7 +279,7 @@ Portal.prototype.switchscene = function(name)
 
 Portal.prototype.DelayedSwitch = function(name)
 {
-    print("At delayed switch!");
+    print("At delayed switch! " + this.userName);
     var camera = framework.Scene().GetScene(this.conname).EntityByName("PortalCamera-" + this.userName).camera;
     //print("Setting camera PortalCamera-" + this.userName + " active!");
     camera.SetActive();
@@ -368,6 +368,7 @@ Portal.prototype.init = function()
         Entity.mesh.SetMaterial(1, matnameBack);
         Entity.Exec(1, "setName", this.userName);
     }
+    print("Setting camera active in Init!");
     cam.camera.SetActive();
 }
 
