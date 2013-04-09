@@ -1,3 +1,4 @@
+// Copyright by Center for Internet Excellence, University of Oulu
 if (!server.IsRunning() && !framework.IsHeadless())
 {
     engine.ImportExtension("qt.core");
@@ -32,9 +33,31 @@ function ObjectGrab(entity, comp)
 
     if(!server.IsRunning())
     {
-        frame.Updated.connect(this, this.UpdateSelectionAnimation);
+        //frame.Updated.connect(this, this.UpdateSelectionAnimation);
+        client.Connected.connect(this, this.ClientConnected);
+        client.SwitchScene.connect(this, this.ClientSwitchScene);
+        client.Disconnected.connect(this, this.ClientDisconnected);
         this.CreateInput();
     }
+}
+
+ObjectGrab.prototype.ClientConnected = function(scenename)
+{
+    // Changes this script to operate with different scene's entities
+    scene = framework.Scene().GetScene(scenename);
+}
+
+ObjectGrab.prototype.ClientSwitchScene = function(scenename)
+{
+    // Changes this script to operate with different scene's entities
+    print("Client switch scene " + scenename);
+    scene = framework.Scene().GetScene(scenename);
+}
+
+ObjectGrab.prototype.ClientDisconnected = function(scenename)
+{
+    // Set scene pointer back to where this script is.
+    scene = this.me.ParentScene();
 }
 
 ObjectGrab.prototype.CreateInput = function()
@@ -70,7 +93,9 @@ ObjectGrab.prototype.OnTouchBegin = function(event)
     // restrict grabbing of objects to specific items in the scene
     var i = 0;
     var entityID = this.GetTargetedEntity(this.touchPoints[0].pos().x(), this.touchPoints[0].pos().y());
-    if (entityID >= 12 && entityID <= 18)
+    var entity = scene.EntityById(entityID);
+    var re1 = new RegExp("^Movable");
+    if (entity && entity.name.match(re1))
     {
         // Check if user selects already selected entity. Deselect it if so.
         //var length = this.entities.length;
@@ -195,7 +220,8 @@ ObjectGrab.prototype.OnTouchEnd = function(event)
             var entity = scene.EntityById(this.entities.pop());
             var transform = this.originalTransform.pop();
             entity.placeable.transform = transform;
-            entity.rigidbody.mass = 10;
+            if (entity.rigidbody)
+                entity.rigidbody.mass = 10;
             entity.highlight.visible = false;
             this.HighlightActivity(false);
             this.targetPortal.Exec(1, "Collision",entity.id, scene.name, transform.scale.x);
@@ -209,7 +235,8 @@ ObjectGrab.prototype.OnTouchEnd = function(event)
             var entity = scene.EntityById(this.entities.pop());
             var transform = this.originalTransform.pop();
             entity.placeable.transform = transform;
-            entity.rigidbody.mass = 10;
+            if (entity.rigidbody)
+                entity.rigidbody.mass = 10;
             entity.highlight.visible = false;
             this.HighlightActivity(false);
             scene.RemoveEntity(entity.id, 2);
@@ -222,7 +249,8 @@ ObjectGrab.prototype.OnTouchEnd = function(event)
     {
         var ent = scene.EntityById(this.entities.pop());
         ent.placeable.transform = this.originalTransform.pop();
-        ent.rigidbody.mass = 10;
+        if (entity.rigidbody)
+            ent.rigidbody.mass = 10;
         ent.highlight.visible = false;
         this.HighlightActivity(false);
     }
@@ -235,7 +263,8 @@ ObjectGrab.prototype.GetTargetedEntity = function(x, y)
 {
     var raycastResult = scene.ogre.Raycast(x, y, 0xffffffff);
     if(raycastResult.entity != null) {
-        if (raycastResult.entity.id >= 12 && raycastResult.entity.id <= 18)
+        var re1 = new RegExp("^Movable");
+        if (raycastResult.entity.name.match(re1))
             return raycastResult.entity.id;
         else
             return -1;
@@ -262,7 +291,8 @@ ObjectGrab.prototype.SelectEntity = function(entityId)
         //this.originalOrientation = entity.placeable.WorldOrientation();
         //this.originalPosition = entity.placeable.transform.pos;
         this.originalTransform = entity.placeable.transform;
-        entity.rigidbody.mass = 0;
+        if (entity.rigidbody)
+            entity.rigidbody.mass = 0;
         entity.rigidbody.phantom = true;
         this.selectedId = entityId;
     }
@@ -285,7 +315,8 @@ ObjectGrab.prototype.ReleaseSelection = function()
         //transform.pos = this.originalPosition;
         //entity.placeable.SetOrientation(this.originalOrientation);
         entity.placeable.transform = this.originalTransform;
-        entity.rigidbody.mass = 10;
+        if (entity.rigidbody)
+            entity.rigidbody.mass = 10;
         entity.rigidbody.phantom = false;
         this.selectedId = -1;
     }
@@ -309,7 +340,16 @@ ObjectGrab.prototype.UpdateSelectionAnimation = function()
 // <MOUSE HANDLERS>
 ObjectGrab.prototype.HandleMouseMove = function(event)
 {
-    var cam = scene.EntityByName("FreeLookCamera").camera;
+    var cameraEntity = scene.EntityByName("PortalCamera");
+    var cam = 0;
+    if (cameraEntity)
+        cam = cameraEntity.camera;
+    else
+    {
+        cameraEntity = scene.EntityByName("FreeLookCamera");
+        cam = cameraEntity.camera;
+    }
+
     if (cam)
     {
         var mainWindow = ui.MainWindow();
@@ -335,6 +375,7 @@ ObjectGrab.prototype.HandleMouseMove = function(event)
                         this.targetPortal.Exec(1, "objectGrabbed", 0);
 
                     this.targetPortal = raycastResult.entity;
+                    print("Setting objectgrab status TRUE to " + raycastResult.entity.name);
                     this.targetPortal.Exec(1, "objectGrabbed", 1);
                     
                     tf.pos = raycastResult.entity.placeable.transform.pos;
@@ -361,8 +402,8 @@ ObjectGrab.prototype.HandleMouseMove = function(event)
                     var uusPaikka = ray.dir.Mul(11);
                     // Set object position to mouse cursor
                     var positio = uusPaikka.Add(ray.pos);
-                    if (positio.y < 0.6)
-                        positio.y = 0.6
+                    //if (positio.y < 0.6)
+                    //    positio.y = 0.6
                     tf.pos = positio;
                     entity.placeable.transform = tf;
                 } 
@@ -390,7 +431,8 @@ ObjectGrab.prototype.HandleMouseRightPressed = function(event)
             var entity = scene.EntityById(this.entities.pop());
             var transform = this.originalTransform.pop();
             entity.placeable.transform = transform;
-            entity.rigidbody.mass = 10;
+            if (entity.rigidbody)
+                entity.rigidbody.mass = 10;
             entity.highlight.visible = false;
             this.targetPortal.Exec(1, "Collision",entity.id, scene.name, transform.scale.x);
             scene.RemoveEntity(entity.id, 2);
@@ -405,7 +447,8 @@ ObjectGrab.prototype.HandleMouseRightPressed = function(event)
             var entity = scene.EntityById(this.entities.pop());
             var transform = this.originalTransform.pop();
             entity.placeable.transform = transform;
-            entity.rigidbody.mass = 10;
+            if (entity.rigidbody)
+                entity.rigidbody.mass = 10;
             entity.highlight.visible = false;
             this.targetPortal.Exec(1, "Collision",entity.id, scene.name, transform.scale.x);
             //scene.RemoveEntity(entity.id, 2);
@@ -426,7 +469,8 @@ ObjectGrab.prototype.HandleMouseRightPressed = function(event)
             {
                 var ent = scene.EntityById(this.entities.pop());
                 ent.placeable.transform = this.originalTransform.pop();
-                ent.rigidbody.mass = 10;
+                if (ent.rigidbody)
+                    ent.rigidbody.mass = 10;
                 ent.highlight.visible = false;
             }
         }
@@ -446,7 +490,8 @@ ObjectGrab.prototype.HandleMouseRightPressed = function(event)
         // Select chosen entity and activate highlight component on it.
         var ent = scene.EntityById(entityID);
         this.originalTransform.push(ent.placeable.transform);
-        ent.rigidbody.mass = 0;
+        if (ent.rigidbody)
+            ent.rigidbody.mass = 0;
         ent.GetOrCreateComponent("EC_Highlight", 2, false);
         ent.highlight.visible = true;
         this.entities.push(entityID);
@@ -459,7 +504,8 @@ ObjectGrab.prototype.HandleMouseRightPressed = function(event)
         {
             var ent = scene.EntityById(this.entities.pop());
             ent.placeable.transform = this.originalTransform.pop();
-            ent.rigidbody.mass = 10;
+            if (ent.rigidbody)
+                ent.rigidbody.mass = 10;
             ent.highlight.visible = false;
         }
     }
@@ -470,7 +516,11 @@ ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
     // restrict grabbing of objects to specific items in the scene
     var i = 0;
     var entityID = this.GetTargetedEntity(event.x, event.y);
-    if (entityID >= 12 && entityID <= 18)
+    if (entityID == -1)
+        return;
+    var entity = scene.EntityById(entityID);
+    var re1 = new RegExp("^Movable");
+    if (entity.name.match(re1))
     {
         // Check if user selects already selected entity. Deselect it if so.
         //var length = this.entities.length;
@@ -504,7 +554,8 @@ ObjectGrab.prototype.HandleMouseLeftPressed = function(event)
         // Select chosen entity and activate highlight component on it.
         var ent = scene.EntityById(entityID);
         this.originalTransform.push(ent.placeable.transform);
-        ent.rigidbody.mass = 0;
+        if (ent.rigidbody)
+            ent.rigidbody.mass = 0;
         ent.GetOrCreateComponent("EC_Highlight", 2, false);
         ent.highlight.visible = true;
         this.entities.push(entityID);
@@ -523,7 +574,8 @@ ObjectGrab.prototype.HandleMouseLeftReleased = function(event)
             var entity = scene.EntityById(this.entities.pop());
             var transform = this.originalTransform.pop();
             entity.placeable.transform = transform;
-            entity.rigidbody.mass = 10;
+            if (entity.rigidbody)
+                entity.rigidbody.mass = 10;
             entity.highlight.visible = false;
             this.HighlightActivity(false);
             this.targetPortal.Exec(1, "Collision",entity.id, scene.name, transform.scale.x);
@@ -537,7 +589,8 @@ ObjectGrab.prototype.HandleMouseLeftReleased = function(event)
             var entity = scene.EntityById(this.entities.pop());
             var transform = this.originalTransform.pop();
             entity.placeable.transform = transform;
-            entity.rigidbody.mass = 10;
+            if (entity.rigidbody)
+                entity.rigidbody.mass = 10;
             entity.highlight.visible = false;
             this.HighlightActivity(false);
             scene.RemoveEntity(entity.id, 2);
@@ -550,7 +603,8 @@ ObjectGrab.prototype.HandleMouseLeftReleased = function(event)
     {
         var ent = scene.EntityById(this.entities.pop());
         ent.placeable.transform = this.originalTransform.pop();
-        ent.rigidbody.mass = 10;
+        if (ent.rigidbody)
+            ent.rigidbody.mass = 10;
         ent.highlight.visible = false;
         this.HighlightActivity(false);
     }
@@ -575,59 +629,50 @@ function DegToRad(deg)
     return deg * (Math.PI / 180.0);
 }
 
+// Highlights active objects from the main camera scene when object is selected.
 ObjectGrab.prototype.HighlightActivity = function(Boolean)
 {
     if (Boolean)
     {
-        var portal1, portal2, portal3, portal4, trash;
-        portal1 = scene.EntityByName("OviReuna1");
-        portal2 = scene.EntityByName("OviReuna2");
-        portal3 = scene.EntityByName("OviReuna3");
-        portal4 = scene.EntityByName("OviReuna4");
-        trash = scene.EntityByName("Trashcan");
-
         var color1 = new Color(0,0.7,0.8);
-        var color2 = new Color(0,0.7,0.8);
-        portal1.GetOrCreateComponent("EC_Highlight", 2, false);
-        portal1.highlight.outlineColor = color1;
-        portal1.highlight.visible = true;
 
-        portal2.GetOrCreateComponent("EC_Highlight", 2, false);
-        portal2.highlight.outlineColor = color1;
-        portal2.highlight.visible = true;
-
-        portal3.GetOrCreateComponent("EC_Highlight", 2, false);
-        portal3.highlight.outlineColor = color1;
-        portal3.highlight.visible = true;
-
-        portal4.GetOrCreateComponent("EC_Highlight", 2, false);
-        portal4.highlight.outlineColor = color1;
-        portal4.highlight.visible = true;
-
-        trash.GetOrCreateComponent("EC_Highlight", 2, false);
-        trash.highlight.outlineColor = color1;
-        trash.highlight.visible = true;
+        var entityIDs = scene.Entities();
+        var re1 = new RegExp("^OviReuna");
+        var re2 = new RegExp("^Trash");
+        var found = 0;
+        var entity = 0;
+        
+        for (i in entityIDs)
+        {
+            entity = scene.EntityById(i);
+            if (entity.name.match(re1) || entity.name.match(re2))
+            {
+                entity.GetOrCreateComponent("EC_Highlight", 2, false);
+                entity.highlight.outlineColor = color1;
+                entity.highlight.visible = true;
+            }
+        }
     }
     else
     {
-        var portal1, portal2, portal3, portal4, trash;
-        portal1 = scene.EntityByName("OviReuna1");
-        portal2 = scene.EntityByName("OviReuna2");
-        portal3 = scene.EntityByName("OviReuna3");
-        portal4 = scene.EntityByName("OviReuna4");
-        trash = scene.EntityByName("Trashcan");
+        var color1 = new Color(0,0.7,0.8);
 
-        portal1.highlight.visible = false;
-        portal1.Exec(1, "update");
-        portal2.highlight.visible = false;
-        portal2.Exec(1, "update");
-        portal3.highlight.visible = false;
-        portal3.Exec(1, "update");
-        portal4.highlight.visible = false;
-        portal4.Exec(1, "update");
-        trash.highlight.visible = false;
+        var entityIDs = scene.Entities();
+        var re1 = new RegExp("^OviReuna");
+        var re2 = new RegExp("^Trash");
+        var found = 0;
+        var entity = 0;
+        
+        for (i in entityIDs)
+        {
+            entity = scene.EntityById(i);
+            if (entity.name.match(re1) || entity.name.match(re2))
+            {
+                entity.highlight.visible = false;
+                entity.Exec(1, "update");
+            }
+        }
     }
-
 }
 
 
