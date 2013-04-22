@@ -19,8 +19,6 @@
 #include <algorithm>
 #include <utility>
 
-#include <boost/make_shared.hpp>
-
 #include "MemoryLeakCheck.h"
 
 using namespace kNet;
@@ -33,7 +31,7 @@ namespace
     {
         SocketTransportLayer transport;
         int portNumber;
-    } destinationPorts[] =
+    } destinationPorts[] = 
     {
         { SocketOverUDP, 2345 }, // The default Kristalli over UDP port.
 
@@ -106,6 +104,7 @@ KristalliProtocolModule::KristalliProtocolModule() :
     reconnectTimer_map_.clear();
     serverConnection_map_.clear();
 }
+
 KristalliProtocolModule::~KristalliProtocolModule()
 {
     Disconnect();
@@ -214,7 +213,7 @@ void KristalliProtocolModule::Update(f64 /*frametime*/)
                     }
                     else
                     {
-                        ::LogInfo("Failed to connect to " + serverIpIter_.value() + ":" + ToString(serverPortIter_.value()));
+                        ::LogInfo(QString("Failed to connect to %1:%2").arg(serverIpIter_.value().c_str()).arg(serverPortIter_.value()));
                         emit ConnectionAttemptFailed(key);
                         continue;
                     }
@@ -229,11 +228,23 @@ void KristalliProtocolModule::Update(f64 /*frametime*/)
         }
     }
 
+    // Note: Calling the above serverConnection->Process() may set serverConnection to null if the connection gets disconnected.
+    // Therefore, in the code below, we cannot assume serverConnection is non-null, and must check it again.
+
+    // Our client->server connection is never kept half-open.
+    // That is, at the moment the server write-closes the connection, we also write-close the connection.
+    // Check here if the server has write-closed, and also write-close our end if so.
+    if (serverConnection && !serverConnection->IsReadOpen() && serverConnection->IsWriteOpen())
+        serverConnection->Disconnect(0);
+    
+    // Process server incoming connections & messages if server up
     if (server)
     {
+        PROFILE(KristalliProtocolModule_kNet_server_Process);
+
         server->Process();
 
-        // In Tundra, we *never* keep half-open server->client connections alive.
+        // In Tundra, we *never* keep half-open server->client connections alive. 
         // (the usual case would be to wait for a file transfer to complete, but Tundra messaging mechanism doesn't use that).
         // So, bidirectionally close all half-open connections.
         NetworkServer::ConnectionMap connections = server->GetConnections();
@@ -266,7 +277,7 @@ void KristalliProtocolModule::PerformConnection()
     serverConnection_map_[connectionID] = network.Connect(serverIp_map_[connectionID].c_str(), serverPort_map_[connectionID], serverTransport_map_[connectionID], this);
     if (!serverConnection_map_[connectionID])
     {
-        ::LogError("Unable to connect to " + serverIp_map_[connectionID] + ":" + ToString(serverPort_map_[connectionID]));
+        ::LogInfo(QString("Unable to connect to %1:%2").arg(serverIp_map_[connectionID].c_str()).arg(serverPort_map_[connectionID]));
         return;
     }
 
@@ -291,7 +302,7 @@ void KristalliProtocolModule::PerformReconnection(QMutableMapIterator<QString, P
     conReference.value() = network.Connect(serverIp_map_.value(key).c_str(), serverPort_map_.value(key), serverTransport_map_.value(key), this);
     if (!conReference.value())
     {
-        ::LogError("Unable to connect to " + serverIp_map_.value(key) + ":" + ToString(serverPort_map_.value(key)));
+        ::LogInfo(QString("Unable to connect to %1:%2").arg(serverIp_map_.value(key).c_str()).arg(serverPort_map_.value(key)));
         return;
     }
 
@@ -302,11 +313,6 @@ void KristalliProtocolModule::PerformReconnection(QMutableMapIterator<QString, P
     if (conReference.value()->GetSocket() && conReference.value()->GetSocket()->TransportLayer() == kNet::SocketOverTCP)
         conReference.value()->GetSocket()->SetNaglesAlgorithmEnabled(false);
 
-#ifdef KNET_HAS_SCTP
-    // For SCTP mode sockets, disable Nagle's option to improve latency for the messages we send.
-    else if (conReference.value()->GetSocket() && conReference.value()->GetSocket()->TransportLayer() == kNet::SocketOverSCTP)
-        conReference.value()->GetSocket()->SetNaglesAlgorithmEnabled(false);
-#endif
 }
 
 void KristalliProtocolModule::Disconnect()
@@ -355,8 +361,9 @@ bool KristalliProtocolModule::StartServer(unsigned short port, SocketTransportLa
     server = network.StartServer(port, transport, this, allowAddressReuse);
     if (!server)
     {
-        ::LogError("Failed to start server on port " + ToString((int)port));
-        throw Exception(("Failed to start server on port " + ToString((int)port) + ". Please make sure that the port is free and not used by another application. The program will now abort.").c_str());
+        const QString error = "Failed to start server on port " + QString::number(port) + ".";
+        ::LogError(error);
+        throw Exception((error + "Please make sure that the port is free and not used by another application. The program will now abort.").toStdString().c_str());
     }
     
     ::LogInfo("Server started");
@@ -397,7 +404,7 @@ void KristalliProtocolModule::NewConnectionEstablished(kNet::MessageConnection *
     if (source->GetSocket() && source->GetSocket()->TransportLayer() == kNet::SocketOverTCP)
         source->GetSocket()->SetNaglesAlgorithmEnabled(false);
 
-    ::LogInfo("User connected from " + source->RemoteEndPoint().ToString() + ", connection ID " + ToString((int)connection->userID));
+    ::LogInfo(QString("User connected from %1, connection ID %2.").arg(source->RemoteEndPoint().ToString().c_str()).arg(connection->userID));
     
     emit ClientConnectedEvent(connection.get());
 }
@@ -410,12 +417,12 @@ void KristalliProtocolModule::ClientDisconnected(MessageConnection *source)
         {
             emit ClientDisconnectedEvent(iter->get());
             
-            ::LogInfo("User disconnected, connection ID " + ToString((int)(*iter)->userID));
+            ::LogInfo("User disconnected, connection ID " + QString::number((*iter)->userID));
             connections.erase(iter);
             return;
         }
 
-    ::LogInfo("Unknown user disconnected");
+        ::LogInfo("Unknown user disconnected");
 }
 
 void KristalliProtocolModule::HandleMessage(kNet::MessageConnection *source, kNet::packet_id_t packetId, kNet::message_id_t messageId, const char *data, size_t numBytes)
@@ -428,8 +435,8 @@ void KristalliProtocolModule::HandleMessage(kNet::MessageConnection *source, kNe
         emit NetworkMessageReceived(source, packetId, messageId, data, numBytes);
     } catch(std::exception &e)
     {
-        ::LogError("KristalliProtocolModule: Exception \"" + std::string(e.what()) + "\" thrown when handling network message id " +
-                   ToString(messageId) + " size " + ToString((int)numBytes) + " from client " + source->ToString());
+        ::LogError("KristalliProtocolModule: Exception \"" + QString(e.what()) + "\" thrown when handling network message id " +
+            QString::number(messageId) + " size " + QString::number(numBytes) + " from client " + source->ToString().c_str());
 
         // Kill the connection. For debugging purposes, don't disconnect the client if the server is running a debug build.
 #ifndef _DEBUG

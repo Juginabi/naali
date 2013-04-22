@@ -179,10 +179,10 @@ void EC_WebView::ServerInitialize(TundraLogic::Server *server)
 {
     if (!server || !server->IsRunning())
         return;
-    connect(server, SIGNAL(UserDisconnected(int, UserConnection*)), SLOT(ServerHandleDisconnect(int, UserConnection*)), Qt::UniqueConnection);
+    connect(server, SIGNAL(UserDisconnected(unsigned int, UserConnection*)), SLOT(ServerHandleDisconnect(unsigned int, UserConnection*)), Qt::UniqueConnection);
 }
 
-void EC_WebView::ServerHandleDisconnect(int connectionID, UserConnection* connection)
+void EC_WebView::ServerHandleDisconnect(unsigned int connectionID, UserConnection* connection)
 {
     // Server will release the control of a EC_Webview if the controlling user disconnects.
     // This will ensure that a webview wont be left in a state that no one can take control of it.
@@ -462,8 +462,7 @@ void EC_WebView::PrepareComponent()
         sceneCanvasName_ = "WebViewCanvas-" + QUuid::createUuid().toString().replace("{", "").replace("}", "");
 
     // Get or create local EC_WidgetCanvas component
-    ComponentPtr iComponent = parent->GetOrCreateComponent(EC_WidgetCanvas::TypeNameStatic(), sceneCanvasName_, AttributeChange::LocalOnly, false);
-    EC_WidgetCanvas *sceneCanvas = dynamic_cast<EC_WidgetCanvas*>(iComponent.get());
+    shared_ptr<EC_WidgetCanvas> sceneCanvas = parent->GetOrCreateComponent<EC_WidgetCanvas>(sceneCanvasName_, AttributeChange::LocalOnly, false);
     if (!sceneCanvas)
     {
         LogError("PrepareComponent: Could not get or create EC_WidgetCanvas component!");
@@ -560,6 +559,7 @@ void EC_WebView::ResetWebView(bool ignoreVisibility)
             }
         }
 
+#ifdef SCENEWIDGET_BROWSER_SHARED_DATA
         // Reset parent of shard cache and cookie jar.
         QNetworkAccessManager *networkManager =  webview_->page() != 0 ? webview_->page()->networkAccessManager() : 0;
         if (networkManager)
@@ -567,7 +567,7 @@ void EC_WebView::ResetWebView(bool ignoreVisibility)
             if (networkManager->cache()) networkManager->cache()->setParent(0);
             if (networkManager->cookieJar()) networkManager->cookieJar()->setParent(0);
         }
-
+#endif
         // Disconnect existing widgets signal connections, 
         // stop its networking, 
         // mark it for Qt cleanup and

@@ -38,10 +38,10 @@ public:
     SyncManager* GetSyncManager() const;
 
     /// Returns client
-    const boost::shared_ptr<Client>& GetClient() const { return client_; }
+    const shared_ptr<Client>& GetClient() const { return client_; }
 
     /// Returns server
-    const boost::shared_ptr<Server>& GetServer() const { return server_; }
+    const shared_ptr<Server>& GetServer() const { return server_; }
 
 public slots:
     /// Saves scene to an XML file
@@ -78,6 +78,8 @@ public slots:
         const float3 &scale = float3(1.f,1.f,1.f), bool inspectForMaterialsAndSkeleton = true);
 
 private slots:
+    /// Reads possible client/server startup parameters and reacts to them upon application startup.
+    void ReadStartupParameters();
     void StartupSceneTransfedSucceeded(AssetPtr asset);
     void StartupSceneTransferFailed(IAssetTransfer *transfer, QString reason);
     void registerSyncManager(const QString);
@@ -93,8 +95,8 @@ private:
     void LoadStartupScene();
 
     QMap<QString, SyncManager*> syncManagers_;
-    boost::shared_ptr<Client> client_; ///< Client
-    boost::shared_ptr<Server> server_; ///< Server
+    shared_ptr<Client> client_; ///< Client
+    shared_ptr<Server> server_; ///< Server
     KristalliProtocolModule *kristalliModule_; ///< KristalliProtocolModule pointer
     bool autoStartServer_; ///< Whether to autostart the server
     unsigned short autoStartServerPort_; ///< Autostart server port

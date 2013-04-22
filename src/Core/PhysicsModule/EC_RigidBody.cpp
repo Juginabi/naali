@@ -33,9 +33,9 @@
 
 using namespace Physics;
 
-static const float cForceThreshold = 0.0005f;
-static const float cImpulseThreshold = 0.0005f;
-static const float cTorqueThreshold = 0.0005f;
+static const float cForceThresholdSq = 0.0005f * 0.0005f;
+static const float cImpulseThresholdSq = 0.0005f * 0.0005f;
+static const float cTorqueThresholdSq = 0.0005f * 0.0005f;
 
 EC_RigidBody::EC_RigidBody(Scene* scene) :
     IComponent(scene),
@@ -56,6 +56,8 @@ EC_RigidBody::EC_RigidBody(Scene* scene) :
     drawDebug(this, "Draw Debug", false),
     collisionLayer(this, "Collision Layer", -1),
     collisionMask(this, "Collision Mask", -1),
+    rollingFriction(this, "Rolling friction", 0.5f),
+    useGravity(this, "Use gravity", true),
     body_(0),
     world_(0),
     shape_(0),
@@ -133,7 +135,7 @@ void EC_RigidBody::ApplyForce(const float3& force, const float3& position)
         return;
     
     // If force is very small, do not wake up the body and apply
-    if (force.Length() < cForceThreshold) ///\todo Use force.LengthSq() instead for optimization.
+    if (force.LengthSq() < cForceThresholdSq)
         return;
     
     if (!body_)
@@ -155,7 +157,7 @@ void EC_RigidBody::ApplyTorque(const float3& torque)
         return;
     
     // If torque is very small, do not wake up the body and apply
-    if (torque.Length() < cTorqueThreshold)  ///\todo Use torque.LengthSq() instead for optimization.
+    if (torque.LengthSq() < cTorqueThresholdSq)
         return;
         
     if (!body_)
@@ -174,7 +176,7 @@ void EC_RigidBody::ApplyImpulse(const float3& impulse, const float3& position)
         return;
     
     // If impulse is very small, do not wake up the body and apply
-    if (impulse.Length() < cImpulseThreshold)  ///\todo Use impulse.LengthSq() instead for optimization.
+    if (impulse.LengthSq() < cImpulseThresholdSq)
         return;
     
     if (!body_)
@@ -196,7 +198,7 @@ void EC_RigidBody::ApplyTorqueImpulse(const float3& torqueImpulse)
         return;
     
     // If impulse is very small, do not wake up the body and apply
-    if (torqueImpulse.Length() < cTorqueThreshold)  ///\todo Use torqueImpulse.LengthSq() instead for optimization.
+    if (torqueImpulse.LengthSq() < cTorqueThresholdSq)
         return;
         
     if (!body_)
@@ -268,7 +270,7 @@ void EC_RigidBody::CheckForPlaceableAndTerrain()
     
     if (!placeable_.lock())
     {
-        boost::shared_ptr<EC_Placeable> placeable = parent->GetComponent<EC_Placeable>();
+        shared_ptr<EC_Placeable> placeable = parent->GetComponent<EC_Placeable>();
         if (placeable)
         {
             placeable_ = placeable;
@@ -277,7 +279,7 @@ void EC_RigidBody::CheckForPlaceableAndTerrain()
     }
     if (!terrain_.lock())
     {
-        boost::shared_ptr<EC_Terrain> terrain = parent->GetComponent<EC_Terrain>();
+        shared_ptr<EC_Terrain> terrain = parent->GetComponent<EC_Terrain>();
         if (terrain)
         {
             terrain_ = terrain;
@@ -380,6 +382,8 @@ void EC_RigidBody::CreateBody()
     body_->setCollisionFlags(collisionFlags);
     world_->BulletWorld()->addRigidBody(body_, collisionLayer.Get(), collisionMask.Get());
     body_->activate();
+    
+    UpdateGravity();
 }
 
 void EC_RigidBody::ReaddBody()
@@ -553,6 +557,9 @@ void EC_RigidBody::AttributesChanged()
     if (friction.ValueChanged())
         body_->setFriction(friction.Get());
     
+    if (rollingFriction.ValueChanged())
+        body_->setRollingFriction(rollingFriction.Get());
+    
     if (restitution.ValueChanged())
         body_->setRestitution(friction.Get());
     
@@ -626,6 +633,9 @@ void EC_RigidBody::AttributesChanged()
         body_->setAngularVelocity(DegToRad(angularVelocity.Get()));
         body_->activate();
     }
+    
+    if (useGravity.ValueChanged())
+        UpdateGravity();
 }
 
 void EC_RigidBody::PlaceableUpdated(IAttribute* attribute)
@@ -775,7 +785,7 @@ void EC_RigidBody::RequestMesh()
     QString collisionMesh = collisionMeshRef.Get().ref.trimmed();
     if (collisionMesh.isEmpty() && parent) // We use the mesh ref in EC_Mesh as the collision mesh ref if no collision mesh is set in EC_RigidBody.
     {
-        boost::shared_ptr<EC_Mesh> mesh = parent->GetComponent<EC_Mesh>();
+        shared_ptr<EC_Mesh> mesh = parent->GetComponent<EC_Mesh>();
         if (!mesh)
             return;
         collisionMesh = mesh->meshRef.Get().ref.trimmed();
@@ -815,6 +825,26 @@ void EC_RigidBody::UpdateScale()
         else
             shape_->setLocalScaling(btVector3(sizeVec.x * scale.x, sizeVec.y * scale.y, sizeVec.z * scale.z));
     }
+}
+
+void EC_RigidBody::UpdateGravity()
+{
+    if (!body_ || !world_)
+        return;
+    
+    int flags = body_->getFlags();
+    if (useGravity.Get())
+    {
+        body_->setGravity(world_->BulletWorld()->getGravity());
+        body_->activate(); // Activate in case body was sleeping
+        flags &= ~BT_DISABLE_WORLD_GRAVITY;
+    }
+    else
+    {
+        body_->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+        flags |= BT_DISABLE_WORLD_GRAVITY;
+    }
+    body_->setFlags(flags);
 }
 
 void EC_RigidBody::CreateHeightFieldFromTerrain()

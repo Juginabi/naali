@@ -60,6 +60,10 @@ class EC_Terrain;
     <div>@copydoc collisionLayer</div>
     <li>int: collisionMask
     <div>@copydoc collisionMask</div>
+    <li>float: rollingFriction
+    <div>@copydoc rollingFriction</div>
+    <li>bool: useGravity
+    <div>@copydoc useGravity</div>
     </ul>
 
     <b>Exposes the following scriptable functions:</b>
@@ -95,7 +99,7 @@ class EC_Terrain;
     <b>Depends on the component @ref EC_Placeable "Placeable", and optionally on @ref EC_Mesh "Mesh" 
     and @ref EC_Terrain "Terrain" to copy the collision shape from them</b>.
     </table> */
-class PHYSICS_MODULE_API EC_RigidBody : public IComponent, public btMotionState
+class PHYSICS_MODULE_API EC_RigidBody : public IComponent, public btMotionState /**< @todo pimpl */
 {
     Q_OBJECT
     COMPONENT_NAME("EC_RigidBody", 23)
@@ -188,6 +192,14 @@ public:
     /// Tells with which collision layers this rigidbody collides with (a bitmask). 0 is default (all bits set)
     Q_PROPERTY(int collisionMask READ getcollisionMask WRITE setcollisionMask)
     DEFINE_QPROPERTY_ATTRIBUTE(int, collisionMask)
+
+    /// Rolling friction coefficient between 0.0 - 1.0.
+    Q_PROPERTY(float rollingFriction READ getrollingFriction WRITE setrollingFriction);
+    DEFINE_QPROPERTY_ATTRIBUTE(float, rollingFriction);
+
+    /// Gravity enable. If true (default), the physics world gravity affects the object.
+    Q_PROPERTY(bool useGravity READ getuseGravity WRITE setuseGravity)
+    DEFINE_QPROPERTY_ATTRIBUTE(bool, useGravity)
 
     /// btMotionState override. Called when Bullet wants us to tell the body's initial transform
     virtual void getWorldTransform(btTransform &worldTrans) const;
@@ -345,6 +357,9 @@ private:
     /// Update position & rotation from placeable
     void UpdatePosRotFromPlaceable();
     
+    /// Update gravity setting of the body.
+    void UpdateGravity();
+    
     /// Request mesh resource (for trimesh & convexhull shapes)
     void RequestMesh();
     
@@ -355,10 +370,10 @@ private:
     void EmitPhysicsCollision(Entity* otherEntity, const float3& position, const float3& normal, float distance, float impulse, bool newCollision);
     
     /// Placeable pointer
-    boost::weak_ptr<EC_Placeable> placeable_;
+    weak_ptr<EC_Placeable> placeable_;
     
     /// Terrain pointer
-    boost::weak_ptr<EC_Terrain> terrain_;
+    weak_ptr<EC_Terrain> terrain_;
     
     /// Internal disconnection of attribute changes. True during the time we're setting attributes ourselves due to Bullet update, to prevent endless loop
     bool disconnected_;
@@ -389,10 +404,10 @@ private:
     float3 cachedSize_;
 
     /// Bullet triangle mesh
-    boost::shared_ptr<btTriangleMesh> triangleMesh_;
+    shared_ptr<btTriangleMesh> triangleMesh_;
     
     /// Convex hull set
-    boost::shared_ptr<Physics::ConvexHullSet> convexHullSet_;
+    shared_ptr<Physics::ConvexHullSet> convexHullSet_;
     
     /// Bullet heightfield shape. Note: this is always put inside a compound shape (shape_)
     btHeightfieldTerrainShape* heightField_;

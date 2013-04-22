@@ -23,6 +23,7 @@
 #include "AssetAPI.h"
 #include "CoreException.h"
 #include "LoggingFunctions.h"
+#include "InterestManager.h"
 
 #include "EC_Name.h"
 #include "EC_DynamicComponent.h"
@@ -70,9 +71,7 @@ TundraLogicModule::TundraLogicModule() :
     IModule("TundraLogic"),
     autoStartServer_(false),
     autoStartServerPort_(cDefaultPort),
-    kristalliModule_(0),
-    netrateBool(false),
-    netrateValue(0)
+    kristalliModule_(0)
 {
 }
 
@@ -114,8 +113,8 @@ void TundraLogicModule::Load()
 
 void TundraLogicModule::Initialize()
 {
-    client_ = boost::make_shared<Client>(this);
-    server_ = boost::make_shared<Server>(this);
+    client_ = MAKE_SHARED(Client, this);
+    server_ = MAKE_SHARED(Server, this);
     
     // Expose client and server to everyone
     framework_->RegisterDynamicObject("client", client_.get());
@@ -128,28 +127,28 @@ void TundraLogicModule::Initialize()
         //framework_->RegisterDynamicObject("syncmanager", syncManagers_[0]);
     }
     framework_->Console()->RegisterCommand("startserver", "Starts a server. Usage: startserver(port,protocol)",
-                                           server_.get(), SLOT(Start(unsigned short,QString)));
+        server_.get(), SLOT(Start(unsigned short,QString)));
 
     framework_->Console()->RegisterCommand("stopserver", "Stops the server", server_.get(), SLOT(Stop()));
 
     framework_->Console()->RegisterCommand("connect",
-                                           "Connects to a server. Usage: connect(address,port,username,password,protocol)",
-                                           client_.get(), SLOT(Login(const QString &, unsigned short, const QString &, const QString&, const QString &)));
+        "Connects to a server. Usage: connect(address,port,username,password,protocol)",
+        client_.get(), SLOT(Login(const QString &, unsigned short, const QString &, const QString&, const QString &)));
 
-    framework_->Console()->RegisterCommand("disconnect", "Disconnects from a server.", client_.get(), SLOT(Logout(QString)));
+    framework_->Console()->RegisterCommand("disconnect", "Disconnects from a server.", client_.get(), SLOT(Logout()));
 
     framework_->Console()->RegisterCommand("savescene",
-                                           "Saves scene into XML or binary. Usage: savescene(filename,asBinary=false,saveTemporaryEntities=false,saveLocalEntities=true)",
-                                           this, SLOT(SaveScene(QString, bool, bool, bool)), SLOT(SaveScene(QString)));
+        "Saves scene into XML or binary. Usage: savescene(filename,asBinary=false,saveTemporaryEntities=false,saveLocalEntities=true)",
+        this, SLOT(SaveScene(QString, bool, bool, bool)), SLOT(SaveScene(QString)));
 
     framework_->Console()->RegisterCommand("loadscene",
-                                           "Loads scene from XML or binary. Usage: loadscene(filename,clearScene=true,useEntityIDsFromFile=true)",
-                                           this, SLOT(LoadScene(QString, bool, bool)));
+        "Loads scene from XML or binary. Usage: loadscene(filename,clearScene=true,useEntityIDsFromFile=true)",
+        this, SLOT(LoadScene(QString, bool, bool)));
 
     framework_->Console()->RegisterCommand("importscene",
-                                           "Loads scene from a dotscene file. Optionally clears the existing scene."
-                                           "Replace-mode can be optionally disabled. Usage: importscene(filename,clearScene=false,replace=true)",
-                                           this, SLOT(ImportScene(QString, bool, bool)), SLOT(ImportScene(QString)));
+        "Loads scene from a dotscene file. Optionally clears the existing scene."
+        "Replace-mode can be optionally disabled. Usage: importscene(filename,clearScene=false,replace=true)",
+        this, SLOT(ImportScene(QString, bool, bool)), SLOT(ImportScene(QString)));
 
     framework_->Console()->RegisterCommand("importmesh",
                                            "Imports a single mesh as a new entity. Position, rotation, and scale can be specified optionally."
@@ -170,54 +169,11 @@ void TundraLogicModule::Initialize()
     if (!kristalliModule_)
         throw Exception("Fatal: could not get KristalliProtocolModule");
 
-    ConfigData configData(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_SERVER, "port", cDefaultPort, cDefaultPort);
-    // Write default values to config if not present.
-    if (!framework_->Config()->HasValue(configData))
-        framework_->Config()->Set(configData);
-
-    // Check whether server should be auto started.
-    if (framework_->HasCommandLineParameter("--server"))
-    {
-        autoStartServer_ = true;
-        // Use parameter port or default to config value
-        QStringList portParam = framework_->CommandLineParameters("--port");
-        if (portParam.size() > 0)
-        {
-            bool ok;
-            unsigned short port = portParam.first().toUShort(&ok);
-            if (ok)
-            {
-                autoStartServerPort_ = port;
-            }
-            else
-            {
-                LogError("--port parameter is not a valid unsigned short.");
-                GetFramework()->Exit();
-            }
-        }
-        else
-            autoStartServerPort_ = GetFramework()->Config()->Get(configData).toInt();
-    }
-    
-    if (framework_->HasCommandLineParameter("--netrate"))
-    {
-        QStringList rateParam = framework_->CommandLineParameters("--netrate");
-        if (rateParam.size() > 0)
-        {
-            bool ok;
-            int rate = rateParam.first().toInt(&ok);
-            if (ok && rate > 0)
-            {
-                // Had to move some logic from here to registerSyncManager() because --netrate cmdLine option needs syncManager.
-                netrateBool = true;
-                netrateValue = rate;
-            }
-            else
-                LogError("--netrate parameter is not a valid integer.");
-        }
-    }
     connect(framework_->Scene(), SIGNAL(SceneAdded(QString)), this, SLOT(registerSyncManager(QString)));
     connect(framework_->Scene(), SIGNAL(SceneRemoved(QString)), this, SLOT(removeSyncManager(QString)));
+
+    // Read startup params when application event loop starts.
+    QTimer::singleShot(0, this, SLOT(ReadStartupParameters()));
 }
 
 void TundraLogicModule::Uninitialize()
@@ -233,51 +189,6 @@ void TundraLogicModule::Uninitialize()
 void TundraLogicModule::Update(f64 frametime)
 {
     PROFILE(TundraLogicModule_Update);
-    ///\todo Remove this hack and find a better solution
-    static bool checkDefaultServerStart = true;
-    if (checkDefaultServerStart)
-    {
-        if (autoStartServer_)
-            server_->Start(autoStartServerPort_);
-        if (framework_->HasCommandLineParameter("--file")) // Load startup scene here (if we have one)
-            LoadStartupScene();
-        checkDefaultServerStart = false;
-    }
-    ///\todo Remove this hack and find a better solution
-    static bool checkLoginStart = true;
-    if (checkLoginStart)
-    {
-        // Web login handling, if we are on a server the request will be ignored down the chain.
-        QStringList cmdLineParams = framework_->CommandLineParameters("--login");
-        if (cmdLineParams.size() > 0)
-        {
-            // Do not use QUrl::TolerantMode as it will do things to percent encoding
-            // we don't want a t this point, see http://doc.trolltech.com/4.7/qurl.html#ParsingMode-enum
-            QUrl loginUrl(cmdLineParams.first(), QUrl::StrictMode);
-            if (loginUrl.isValid())
-                client_->Login(loginUrl);
-            else
-                LogError("TundraLogicModule: Login URL is not valid after strict parsing: " + cmdLineParams.first());
-        }
-
-        checkLoginStart = false;
-    }
-    ///\todo Remove this hack and find a better solution
-    static bool checkConnectStart = true;
-    if (checkConnectStart)
-    {
-        if (framework_->CommandLineParameters("--connect").size() == 1)
-        {
-            QStringList params = framework_->CommandLineParameters("--connect").first().split(';');
-            if (params.size() >= 4)
-                client_->Login(/*addr*/params[0], /*port*/params[1].toInt(), /*username*/params[3],
-                        /*optional passwd*/ params.size() >= 5 ? params[4] : "", /*protocol*/params[2]);
-            else
-                LogError("TundraLogicModule: Not enought parameters for --connect. Usage '--connect serverIp;port;protocol;name;password'. Password is optional.");
-        }
-        checkConnectStart = false;
-    }
-
     // Update client & server
     if (client_)
         client_->Update(frametime);
@@ -328,7 +239,7 @@ void TundraLogicModule::LoadStartupScene()
     if (!scene)
     {
         scene = framework_->Scene()->CreateScene("TundraServer", true, true).get();
-        //        framework_->Scene()->SetDefaultScene(scene);
+//        framework_->Scene()->SetDefaultScene(scene);
     }
 
     bool hasFile = framework_->HasCommandLineParameter("--file");
@@ -368,6 +279,92 @@ void TundraLogicModule::LoadStartupScene()
     }
 }
 
+void TundraLogicModule::ReadStartupParameters()
+{
+    // Check whether server should be auto started.
+    const bool autoStartServer = framework_->HasCommandLineParameter("--server");
+    const bool hasPortParam = framework_->HasCommandLineParameter("--port");
+    ushort autoStartServerPort = cDefaultPort;
+    if (hasPortParam && !autoStartServer)
+        LogWarning("TundraLogicModule::ReadStartupParameters: --port parameter given, but --server parameter is not present. Server will not be started.");
+
+    // Write default values to config if not present.
+    ConfigData configData(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_SERVER, "port", cDefaultPort, cDefaultPort);
+    if (!framework_->Config()->HasValue(configData))
+        framework_->Config()->Set(configData);
+
+    if (autoStartServer)
+    {
+        // Use parameter port or default to config value
+        const QStringList portParam = framework_->CommandLineParameters("--port");
+        if (hasPortParam && portParam.empty())
+        {
+            LogWarning("TundraLogicModule::ReadStartupParameters: --port parameter given without value. Using the default from config.");
+            autoStartServerPort = GetFramework()->Config()->Get(configData).toInt();
+        }
+        else if (!portParam.empty())
+        {
+            bool ok;
+            autoStartServerPort = portParam.first().toUShort(&ok);
+            if (!ok)
+            {
+                LogError("TundraLogicModule::ReadStartupParameters: --port parameter is not a valid unsigned short.");
+                GetFramework()->Exit();
+            }
+        }
+    }
+
+    /// @todo Move --netRate handling to SyncManager.
+    const bool hasNetRate = framework_->HasCommandLineParameter("--netrate");
+    const QStringList rateParam = framework_->CommandLineParameters("--netrate");
+    if (hasNetRate && rateParam.empty())
+        LogWarning("TundraLogicModule::ReadStartupParameters: --netrate parameter given without value.");
+    if (!rateParam.empty())
+    {
+        bool ok;
+        int rate = rateParam.first().toInt(&ok);
+        if (ok && rate > 0)
+        {
+            // Had to move some logic from here to registerSyncManager() because --netrate cmdLine option needs syncManager.
+            netrateBool = true;
+            netrateValue = rate;
+        }
+        else
+            LogError("TundraLogicModule::ReadStartupParameters: --netrate parameter is not a valid integer.");
+    }
+
+    if (autoStartServer)
+        server_->Start(autoStartServerPort); 
+    if (framework_->HasCommandLineParameter("--file")) // Load startup scene here (if we have one)
+        LoadStartupScene();
+
+    // Web login handling, if we are on a server the request will be ignored down the chain.
+    QStringList cmdLineParams = framework_->CommandLineParameters("--login");
+    if (cmdLineParams.size() > 0)
+    {
+        // Do not use QUrl::TolerantMode as it will do things to percent encoding
+        // we don't want a t this point, see http://doc.trolltech.com/4.7/qurl.html#ParsingMode-enum
+        QUrl loginUrl(cmdLineParams.first(), QUrl::StrictMode);
+        if (loginUrl.isValid())
+            client_->Login(loginUrl);
+        else
+            LogError("TundraLogicModule::ReadStartupParameters: Login URL is not valid after strict parsing: " + cmdLineParams.first());
+    }
+
+    QStringList connectArgs = framework_->CommandLineParameters("--connect");
+    if (connectArgs.size() > 1) /**< @todo If/when multi-connection support is on place, this should be changed! */
+        LogWarning("TundraLogicModule::ReadStartupParameters: multiple --connect parameters given, ignoring all of them!");
+    if (connectArgs.size() == 1)
+    {
+        QStringList params = connectArgs.first().split(';');
+        if (params.size() >= 4)
+            client_->Login(/*addr*/params[0], /*port*/params[1].toInt(), /*username*/params[3],
+            /*optional passwd*/ params.size() >= 5 ? params[4] : "", /*protocol*/params[2]);
+        else
+            LogError("TundraLogicModule::ReadStartupParameters: Not enought parameters for --connect. Usage '--connect serverIp;port;protocol;name;password'. Password is optional.");
+    }
+}
+
 void TundraLogicModule::StartupSceneTransfedSucceeded(AssetPtr asset)
 {
     QString sceneDiskSource = asset->DiskSource();
@@ -397,12 +394,10 @@ bool TundraLogicModule::SaveScene(QString filename, bool asBinary, bool saveTemp
         return false;
     }
     
-    bool success = false;
     if (asBinary)
-        success = scene->SaveSceneBinary(filename, saveTemporaryEntities, saveLocalEntities);
+        return scene->SaveSceneBinary(filename, saveTemporaryEntities, saveLocalEntities);
     else
-        success = scene->SaveSceneXML(filename, saveTemporaryEntities, saveLocalEntities);
-    return success;
+        return scene->SaveSceneXML(filename, saveTemporaryEntities, saveLocalEntities);
 }
 
 bool TundraLogicModule::LoadScene(QString filename, bool clearScene, bool useEntityIDsFromFile)
@@ -452,7 +447,7 @@ bool TundraLogicModule::ImportScene(QString filename, bool clearScene, bool repl
     kNet::PolledTimer timer;
     SceneImporter importer(scene->shared_from_this());
     QList<Entity *> entities = importer.Import(filename, QFileInfo(filename).dir().path(), Transform(),
-                                               "local://", AttributeChange::Default, clearScene, replace);
+        "local://", AttributeChange::Default, clearScene, replace);
 
     LogInfo(QString("Importing of Ogre .scene finished. %1 entities created in %2 msecs.").arg(entities.size()).arg(timer.MSecsElapsed()));
     return entities.size() > 0;
@@ -477,7 +472,7 @@ bool TundraLogicModule::ImportMesh(QString filename, const float3 &pos, const fl
 
     SceneImporter importer(scene->shared_from_this());
     EntityPtr entity = importer.ImportMesh(filename, QFileInfo(filename).dir().path(), Transform(pos, rot, scale),
-                                           "", "local://", AttributeChange::Default, inspect);
+        "", "local://", AttributeChange::Default, inspect);
     if (!entity)
         LogError("TundraLogicModule::ImportMesh: import failed for " + filename + ".");
     return entity != 0;

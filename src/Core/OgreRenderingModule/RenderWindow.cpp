@@ -6,6 +6,7 @@
 
 #include "RenderWindow.h"
 #include "CoreStringUtils.h"
+#include "ConfigAPI.h"
 
 #include <QWidget>
 #include <QImage>
@@ -104,13 +105,30 @@ void RenderWindow::CreateRenderWindow(QWidget *targetWindow, const QString &name
     params["externalWindowHandle"] = Ogre::StringConverter::toString((int)window);
 #endif
 
-    // See http://www.ogre3d.org/tikiwiki/RenderWindowParameters
-    if (fw->CommandLineParameters("--vsync").length() > 0) // "Synchronize buffer swaps to monitor vsync, eliminating tearing at the expense of a fixed frame rate"
-        params["vsync"] = ParseBool(fw->CommandLineParameters("--vsync").first());
+    /** See http://www.ogre3d.org/tikiwiki/RenderWindowParameters
+        @note All the values must be strings. Assigning int/bool etc. directly to the map produces a empty string value!
+        @bug Check if the keys and values are valid from Ogre::RenderSystem::getConfigOptions(). If you feed carbage to the map outside the accepted values
+        (eg. FSAA) you may crash when the render window is created. Additionally if the map keys are case sensitive we might have bugs below (eg. vsync vs. VSync)! */
     if (fw->CommandLineParameters("--vsyncFrequency").length() > 0) // "Display frequency rate; only applies if fullScreen is set."
-        params["displayFrequency"] = fw->CommandLineParameters("--vsyncFrequency").first().toInt();
+        params["displayFrequency"] = fw->CommandLineParameters("--vsyncFrequency").first().toStdString();
+    if (fw->CommandLineParameters("--vsync").length() > 0) // "Synchronize buffer swaps to monitor vsync, eliminating tearing at the expense of a fixed frame rate"
+        params["vsync"] = fw->CommandLineParameters("--vsync").first().toStdString();
+    else if (fw->Config()->HasKey(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_RENDERING, "vsync"))
+    {
+        QString value = fw->Config()->Get(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_RENDERING, "vsync", "").toString();
+        if (!value.isEmpty())
+            params["vsync"] = value.toStdString();
+    }
     if (fw->CommandLineParameters("--antialias").length() > 0) // "Full screen antialiasing factor"
-        params["FSAA"] = fw->CommandLineParameters("--antialias").first().toInt();
+        params["FSAA"] = fw->CommandLineParameters("--antialias").first().toStdString();
+    else if (fw->Config()->HasKey(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_RENDERING, "antialias"))
+    {
+        // Accepted FSAA values can be more than just a number, allow any string from config file. 
+        QString value = fw->Config()->Get(ConfigAPI::FILE_FRAMEWORK, ConfigAPI::SECTION_RENDERING, "antialias", "").toString();
+        if (!value.isEmpty())
+            params["FSAA"] = value.toStdString();
+    }
+        
 #ifdef WIN32
     if (targetWindow)
         params["externalWindowHandle"] = Ogre::StringConverter::toString((unsigned int)targetWindow->winId());

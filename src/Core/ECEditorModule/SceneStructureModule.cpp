@@ -38,6 +38,7 @@
 #include "OgreWorld.h"
 #include "ConfigAPI.h"
 #include "OgreMaterialUtils.h"
+#include "AssetItemMenuHandler.h"
 
 #include <QToolTip>
 #include <QCursor>
@@ -106,6 +107,8 @@ void SceneStructureModule::Initialize()
         toolTip = new QLabel(toolTipWidget);
         toolTip->setTextFormat(Qt::RichText);
         toolTipWidget->layout()->addWidget(toolTip);
+
+        assetItemMenuHandler = new AssetItemMenuHandler(framework_);
     }
 }
 
@@ -319,7 +322,8 @@ void SceneStructureModule::CleanReference(QString &fileRef)
 
 void SceneStructureModule::ToggleSceneStructureWindow()
 {
-    if (!GetFramework()->Scene()->MainCameraScene())
+    Scene *scene = GetFramework()->Scene()->MainCameraScene();
+    if (!scene)
     {
         LogError("SceneStructureModule::ToggleSceneStructureWindow: Main camera scene is null.");
         return;
@@ -339,7 +343,7 @@ void SceneStructureModule::ToggleSceneStructureWindow()
         sceneWindow = new SceneStructureWindow(framework_, framework_->Ui()->MainWindow());
         sceneWindow->setAttribute(Qt::WA_DeleteOnClose);
         sceneWindow->setWindowFlags(Qt::Tool);
-        sceneWindow->SetScene(GetFramework()->Scene()->MainCameraScene()->shared_from_this());
+        sceneWindow->SetScene(scene->shared_from_this());
         LoadWindowPosition(sceneWindow.data(), cSceneWindowPos);
         sceneWindow->show();
 
@@ -635,17 +639,13 @@ void SceneStructureModule::HandleDropEvent(QDropEvent *e, QGraphicsItem *widget)
         if (!res->entity)
         {
             // No entity hit, use camera's position with hard-coded offset.
-            foreach(const EntityPtr &cam, scene->EntitiesWithComponent(EC_Camera::TypeNameStatic()))
-                if (cam->GetComponent<EC_Camera>()->IsActive())
-                {
-                    EC_Placeable *placeable = cam->GetComponent<EC_Placeable>().get();
-                    if (placeable)
-                    {
-                        float3 dir = placeable->WorldOrientation() * scene->ForwardVector();
-                        worldPos = placeable->Position() + dir * 20;
-                        break;
-                    }
-                }
+            Entity *cameraEntity = world->Renderer()->MainCamera();
+            EC_Placeable *placeable = (cameraEntity ? cameraEntity->GetComponent<EC_Placeable>().get() : 0);
+            if (placeable)
+            {
+                float3 dir = placeable->WorldOrientation() * scene->ForwardVector();
+                worldPos = placeable->Position() + dir * 20;
+            }
         }
         else
             worldPos = res->pos;

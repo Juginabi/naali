@@ -17,6 +17,8 @@
 #include "FunctionInvoker.h"
 #include "ECEditorModule.h"
 #include "TransformEditor.h"
+#include "UndoCommands.h"
+#include "UndoManager.h"
 
 #include "Scene/Scene.h"
 #include "Entity.h"
@@ -30,6 +32,10 @@
 #include "UiAPI.h"
 #include "UiMainWindow.h"
 #include "LoggingFunctions.h"
+#include "Math/float2.h"
+#include "Math/float3.h"
+#include "Math/float4.h"
+#include "Math/Quat.h"
 #ifdef EC_Highlight_ENABLED
 #include "EC_Highlight.h"
 #endif
@@ -39,7 +45,10 @@
 
 #include "MemoryLeakCheck.h"
 
-const QString cEcEditorHighlight("EcEditorHighlight");
+namespace
+{
+
+const char *cEcEditorHighlight = "EcEditorHighlight";
 
 uint AddUniqueListItem(const EntityPtr &entity, QListWidget* list, const QString& name)
 {
@@ -54,11 +63,7 @@ uint AddUniqueListItem(const EntityPtr &entity, QListWidget* list, const QString
     return list->count() - 1;
 }
 
-/// Function that is used by std::sort algorithm to sort entities by their ids.
-bool CmpEntityById(const EntityPtr &a, const EntityPtr &b)
-{
-    return a->Id() < b->Id();
-}
+} // ~unnamed namespace
 
 ECEditorWindow::ECEditorWindow(Framework* fw, QWidget *parent) :
     QWidget(parent),
@@ -66,8 +71,7 @@ ECEditorWindow::ECEditorWindow(Framework* fw, QWidget *parent) :
     toggleEntitiesButton(0),
     entityList(0),
     ecBrowser(0),
-    hasFocus(true),
-    transformEditor(new TransformEditor(fw->Scene()->MainCameraScene()->shared_from_this()))
+    hasFocus(true)
 {
     QUiLoader loader;
     loader.setLanguageChangeEnabled(true);
@@ -88,7 +92,23 @@ ECEditorWindow::ECEditorWindow(Framework* fw, QWidget *parent) :
     contents->installEventFilter(this);
     file.close();
 
+    Scene *scene = fw->Scene()->MainCameraScene();
+    assert(scene);
+    undoManager_ = new UndoManager(scene->shared_from_this(), this);
+    transformEditor = new TransformEditor(scene->shared_from_this(), undoManager_);
+
     QVBoxLayout *layout = new QVBoxLayout(this);
+    undoButton_ = findChild<QToolButton *>("undoButton");
+    undoButton_->setDisabled(true);
+    redoButton_ = findChild<QToolButton *>("redoButton");
+    redoButton_->setDisabled(true);
+
+    undoButton_->setIcon(QIcon(Application::InstallationDirectory() + "data/ui/images/icon/undo-icon.png"));
+    redoButton_->setIcon(QIcon(Application::InstallationDirectory() + "data/ui/images/icon/redo-icon.png"));
+
+    undoButton_->setMenu(undoManager_->UndoMenu());
+    redoButton_->setMenu(undoManager_->RedoMenu());
+
     layout->addWidget(contents);
     layout->setContentsMargins(0,0,0,0);
     setLayout(layout);
@@ -104,7 +124,7 @@ ECEditorWindow::ECEditorWindow(Framework* fw, QWidget *parent) :
     QWidget *browserWidget = findChild<QWidget*>("browser_widget");
     if (browserWidget)
     {
-        ecBrowser = new ECBrowser(framework, browserWidget);
+        ecBrowser = new ECBrowser(framework, this, browserWidget);
         ecBrowser->setMinimumWidth(100);
         QVBoxLayout *property_layout = dynamic_cast<QVBoxLayout *>(browserWidget->layout());
         if (property_layout)
@@ -139,24 +159,23 @@ ECEditorWindow::ECEditorWindow(Framework* fw, QWidget *parent) :
     if (expandOrCollapseButton && ecBrowser)
         connect(expandOrCollapseButton, SIGNAL(clicked()), ecBrowser, SLOT(ExpandOrCollapseAll()));
 
-    ///\todo Do we want to EC editor listen to scene changed signals, or is editor "dedicated" to the scene that was active when the editor was created?
-    //connect(framework->Scene(), SIGNAL(DefaultWorldSceneChanged(Scene *)), SLOT(OnDefaultSceneChanged(Scene *)));
-
-    Scene *scene = framework->Scene()->MainCameraScene();
-    if (scene)
-    {
-        connect(scene, SIGNAL(EntityRemoved(Entity*, AttributeChange::Type)), SLOT(RemoveEntity(Entity*)), Qt::UniqueConnection);
-        connect(scene, SIGNAL(ActionTriggered(Entity *, const QString &, const QStringList &, EntityAction::ExecTypeField)),
-            SLOT(OnActionTriggered(Entity *, const QString &, const QStringList &)), Qt::UniqueConnection);
-    }
+    connect(scene, SIGNAL(EntityRemoved(Entity*, AttributeChange::Type)), SLOT(RemoveEntity(Entity*)), Qt::UniqueConnection);
+    connect(scene, SIGNAL(ActionTriggered(Entity *, const QString &, const QStringList &, EntityAction::ExecTypeField)),
+        SLOT(OnActionTriggered(Entity *, const QString &, const QStringList &)), Qt::UniqueConnection);
 
     connect(this, SIGNAL(FocusChanged(ECEditorWindow *)), ecEditorModule, SLOT(ECEditorFocusChanged(ECEditorWindow*)));
     connect(this, SIGNAL(EditEntityXml(const QList<EntityPtr> &)), ecEditorModule, SLOT(CreateXmlEditor(const QList<EntityPtr> &)));
     connect(this, SIGNAL(EditComponentXml(const QList<ComponentPtr> &)), ecEditorModule, SLOT(CreateXmlEditor(const QList<ComponentPtr> &)));
+    //connect(this, SIGNAL(AttributeAboutToBeEdited(IAttribute *)), this, SLOT(OnAboutToEditAttribute(IAttribute* )));
+    connect(undoManager_, SIGNAL(CanUndoChanged(bool)), this, SLOT(OnUndoChanged(bool)));
+    connect(undoManager_, SIGNAL(CanRedoChanged(bool)), this, SLOT(OnRedoChanged(bool)));
+    connect(undoButton_, SIGNAL(clicked()), undoManager_, SLOT(Undo()));
+    connect(redoButton_, SIGNAL(clicked()), undoManager_, SLOT(Redo()));
 }
 
 ECEditorWindow::~ECEditorWindow()
 {
+    SAFE_DELETE(undoManager_);
     SAFE_DELETE(transformEditor);
     //DeselectAllEntities(); the list is already cleared here
 }
@@ -211,7 +230,7 @@ void ECEditorWindow::RemoveEntity(entity_id_t entity_id, bool udpate_ui)
     EntityPtr entity = framework->Scene()->MainCameraScene()->GetEntity(entity_id);
     if (!entity)
     {
-        LogError("Fail to remove entity, since scene don't contain entity by ID:" + ToString<entity_id_t>(entity_id));
+        LogError("Failed to remove entity, since scene doesn't contain entity with ID: " + QString::number(entity_id));
         return;
     }
 
@@ -594,7 +613,7 @@ void ECEditorWindow::OpenFunctionDialog()
 {
     QObjectWeakPtrList objs;
     foreach(const EntityPtr &entity, SelectedEntities())
-        objs << boost::dynamic_pointer_cast<QObject>(entity);
+        objs << dynamic_pointer_cast<QObject>(entity);
 
     if (objs.size())
     {
@@ -628,10 +647,10 @@ void ECEditorWindow::RefreshPropertyBrowser()
 
     // Unbold all items for starters.
     BoldEntityListItems(QSet<entity_id_t>());
+    undoManager_->Clear();
 
     QList<EntityPtr> entities = SelectedEntities();
-    // If any of entities was not selected clear the browser window.
-    if (!entities.size())
+    if (entities.empty()) // If any of entities was not selected clear the browser window.
     {
         ecBrowser->clear();
         transformEditor->SetGizmoVisible(false);
@@ -639,14 +658,14 @@ void ECEditorWindow::RefreshPropertyBrowser()
     }
 
     QList<EntityPtr> old_entities = ecBrowser->GetEntities();
-    qStableSort(entities.begin(), entities.end(), CmpEntityById);
-    qStableSort(old_entities.begin(), old_entities.end(), CmpEntityById);
+    qStableSort(entities.begin(), entities.end());
+    qStableSort(old_entities.begin(), old_entities.end());
 
     // Check what entities need to get removed/added to browser.
     QList<EntityPtr>::iterator iter1 = old_entities.begin(), iter2 = entities.begin();
     while(iter1 != old_entities.end() || iter2 != entities.end())
     {
-        // No point to continue the iteration if old_entities list is empty. We can just push all new entitites into the browser.
+        // No point to continue the iteration if old_entities list is empty. We can just push all new entities into the browser.
         if (iter1 == old_entities.end())
         {
             for(;iter2 != entities.end(); ++iter2)
@@ -893,7 +912,7 @@ void ECEditorWindow::HighlightEntity(const EntityPtr &entity, bool highlight)
         // absolutely nothing if there is no mesh. Granted it listens when EC_Mesh is added, but if you
         // are going to add meshes you might as well reselect your entities to get a highlight.
         // Creating the EC_Highlight to the entity is a major time spender if we are talking of large amount of entities.
-        if (!entity->GetComponent(EC_Mesh::TypeNameStatic()).get())
+        if (!entity->GetComponent<EC_Mesh>())
             return;
 
         // If component already has an EC_Highlight, that is not ours, do nothing, as the highlights would conflict
@@ -998,16 +1017,18 @@ void ECEditorWindow::AddComponentDialogFinished(int result)
     Scene *scene = framework->Scene()->MainCameraScene();
     if (!scene)
     {
-        LogWarning("Fail to add new component to entity, since default world scene was null");
+        LogWarning("Failed to add new component to entity, since main camera scene was null");
         return;
     }
+
+    QList<entity_id_t> targetEntities;
 
     foreach(entity_id_t id, dialog->EntityIds())
     {
         EntityPtr entity = scene->GetEntity(id);
         if (!entity)
         {
-            LogWarning("Fail to add new component to entity, since couldn't find a entity with ID:" + ::ToString<entity_id_t>(id));
+            LogWarning("Failed to add a new component to an entity, since couldn't find a entity with ID: " + QString::number(id));
             continue;
         }
 
@@ -1015,17 +1036,154 @@ void ECEditorWindow::AddComponentDialogFinished(int result)
         ComponentPtr comp = entity->GetComponent(dialog->TypeName(), dialog->Name());
         if (comp)
         {
-            LogWarning("Fail to add a new component, cause there was already a component with a same name and a type");
+            LogWarning("Failed to add a new component, because there was already a component with the same type and the same name.");
             continue;
         }
 
-        comp = framework->Scene()->CreateComponentByName(scene, dialog->TypeName(), dialog->Name());
-        assert(comp);
-        if (comp)
+        targetEntities << id;
+    }
+
+    undoManager_->Push(new AddComponentCommand(scene->shared_from_this(), undoManager_->GetTracker(), targetEntities, dialog->TypeName(), dialog->Name(), dialog->IsReplicated(), dialog->IsTemporary()));
+}
+
+void ECEditorWindow::OnAboutToEditAttribute(IAttribute *attr)
+{
+    if (attr)
+    {
+        u32 type = attr->TypeId();
+        switch (type)
         {
-            comp->SetReplicated(dialog->IsReplicated());
-            comp->SetTemporary(dialog->IsTemporary());
-            entity->AddComponent(comp, AttributeChange::Default);
+            case cAttributeReal:
+            {
+                Attribute<float> *a = static_cast<Attribute<float> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<float>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeInt:
+            {
+                Attribute<int> *a = static_cast<Attribute<int> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<int>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeUInt:
+            {
+                Attribute<unsigned int> *a = static_cast<Attribute<unsigned int> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<unsigned int>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeFloat2:
+            {
+                Attribute<float2> *a = static_cast<Attribute<float2> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<float2>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeFloat3:
+            {
+                Attribute<float3> *a = static_cast<Attribute<float3> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<float3>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeFloat4:
+            {
+                Attribute<float4> *a = static_cast<Attribute<float4> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<float4>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeQuat:
+            {
+                Attribute<Quat> *a = static_cast<Attribute<Quat> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<Quat>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeColor:
+            {
+                Attribute<Color> *a = static_cast<Attribute<Color> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<Color>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeString:
+            {
+                Attribute<QString> *a = static_cast<Attribute<QString> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<QString>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeBool:
+            {
+                Attribute<bool> *a = static_cast<Attribute<bool> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<bool>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeQVariant:
+            {
+                Attribute<QVariant> *a = static_cast<Attribute<QVariant> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<QVariant>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeQVariantList:
+            {
+                Attribute<QVariantList> *a = static_cast<Attribute<QVariantList> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<QVariantList>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeEntityReference:
+            {
+                Attribute<EntityReference> *a = static_cast<Attribute<EntityReference> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<EntityReference>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeAssetReference:
+            {
+                Attribute<AssetReference> *a = static_cast<Attribute<AssetReference> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<AssetReference>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeAssetReferenceList:
+            {
+                Attribute<AssetReferenceList> *a = static_cast<Attribute<AssetReferenceList> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<AssetReferenceList>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeTransform:
+            {
+                Attribute<Transform> *a = static_cast<Attribute<Transform> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<Transform>(attr, a->Get()));
+            }
+            break;
+
+            case cAttributeQPoint:
+            {
+                Attribute<QPoint> *a = static_cast<Attribute<QPoint> *>(attr);
+                undoManager_->Push(new EditAttributeCommand<QPoint>(attr, a->Get()));
+            }
+            break;
+
+            default:
+                LogWarning("Unknown attribute type " + attr->TypeName() + " for pushing into the undo stack.");
         }
     }
+}
+
+void ECEditorWindow::OnUndoChanged(bool canUndo)
+{
+    undoButton_->setEnabled(canUndo);
+}
+
+void ECEditorWindow::OnRedoChanged(bool canRedo)
+{
+    redoButton_->setEnabled(canRedo);
 }

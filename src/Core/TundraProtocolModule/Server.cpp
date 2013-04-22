@@ -50,7 +50,7 @@ Server::~Server()
 {
 }
 
-void Server::Update(f64 frametime)
+void Server::Update(f64 /*frametime*/)
 {
 }
 
@@ -62,6 +62,8 @@ bool Server::Start(unsigned short port, QString protocol)
         return true; // Already started, don't need to do anything.
     }
 
+    // By default should operate over UDP.
+    const kNet::SocketTransportLayer defaultProtocol = owner_->GetKristalliModule()->defaultTransport;
     // Protocol is usually defined as a --protocol command line parameter or in config file,
     // but if it's given as a param to this function use it instead.
     if (protocol.isEmpty() && framework_->HasCommandLineParameter("--protocol"))
@@ -70,14 +72,15 @@ bool Server::Start(unsigned short port, QString protocol)
         if (cmdLineParams.size() > 0)
             protocol = cmdLineParams[0];
         else
-            ::LogError("--protocol specified without a parameter! Using UDP protocol as default.");
+            ::LogError("--protocol specified without a parameter! Using " + SocketTransportLayerToString(defaultProtocol) + " protocol as default.");
     }
 
-    kNet::SocketTransportLayer transportLayer = StringToSocketTransportLayer(protocol.trimmed().toStdString().c_str());
+    kNet::SocketTransportLayer transportLayer = protocol.isEmpty() ? defaultProtocol : StringToSocketTransportLayer(protocol.trimmed().toStdString().c_str());
     if (transportLayer == kNet::InvalidTransportLayer)
     {
-        ::LogError("Invalid server protocol '" + protocol + "' specified! Using UDP protocol as default.");
-        transportLayer = kNet::SocketOverUDP; // By default operate over UDP.
+        ::LogError("Invalid server protocol '" + protocol.toStdString() + "' specified! Using " +
+            SocketTransportLayerToString(defaultProtocol) + " protocol as default.");
+        transportLayer = defaultProtocol;
     }
 
     // Start server
@@ -94,7 +97,8 @@ bool Server::Start(unsigned short port, QString protocol)
     // Create the default server scene
     ScenePtr scene = framework_->Scene()->CreateScene("TundraServer", true, true);
 //    framework_->Scene()->SetDefaultScene(scene);
-    owner_->GetSyncManager()->RegisterToScene(scene);
+    SyncManager* sync = owner_->GetSyncManager();
+    sync->RegisterToScene(scene);
 
     emit ServerStarted();
 
@@ -179,7 +183,7 @@ QVariantList Server::GetConnectionIDs() const
 //    LogWarning("Server::GetConnectionIDs: This function signature is deprecated will be removed. Migrate to using AuthenticatedUsers instead.");
     QVariantList ret;
     foreach(const UserConnectionPtr &user, AuthenticatedUsers())
-        ret.push_back(QVariant(user->userID));
+        ret.push_back(QVariant((uint)user->userID)); /**< @todo The uint cast should not be necessary here, but without it when compiling TUNDRA_NO_BOOST build with VC9 we get error C2440: '<function-style-cast>' : cannot convert from 'u32' to 'QVariant' */
     return ret;
 }
 

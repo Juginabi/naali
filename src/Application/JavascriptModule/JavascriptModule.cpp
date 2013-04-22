@@ -1,9 +1,8 @@
 /**
- *  For conditions of distribution and use, see copyright notice in LICENSE
- *
- *  @file   JavascriptModule.cpp
- *  @brief  Enables Javascript execution and scripting by using QtScript.
- */
+    For conditions of distribution and use, see copyright notice in LICENSE
+
+    @file   JavascriptModule.cpp
+    @brief  Enables Javascript execution and scripting by using QtScript. */
 
 #include "StableHeaders.h"
 #include "DebugOperatorNew.h"
@@ -120,27 +119,21 @@ void JavascriptModule::RunString(const QString &codestr, const QVariantMap &cont
 
 void JavascriptModule::DumpScriptInfo()
 {
-    if (!framework_->Scene()->MainCameraScene())
+    Scene *scene = framework_->Scene()->MainCameraScene();
+    if (!scene)
     {
         LogInfo("Scene is null, no scripts running.");
         return;
     }
-    EntityList scripts = framework_->Scene()->MainCameraScene()->GetEntitiesWithComponent(EC_Script::TypeNameStatic());
+    std::vector<shared_ptr<EC_Script> > scripts = scene->Components<EC_Script>();
     if (scripts.empty())
     {
         LogInfo("No scripts running in the scene");
         return;
     }
-    for(EntityList::iterator iter=scripts.begin(); iter!=scripts.end(); iter++)
+    for(unsigned i = 0; i < scripts.size(); ++i)
     {
-        EntityPtr ent = (*iter);
-        if (!ent.get())
-            continue;
-
-        EC_Script *script = ent->GetComponent<EC_Script>().get();
-        if (!script)
-            continue;
-        JavascriptInstance *jsInstance = dynamic_cast<JavascriptInstance*>(script->ScriptInstance());
+        JavascriptInstance *jsInstance = dynamic_cast<JavascriptInstance*>(scripts[i]->ScriptInstance());
         if (!jsInstance)
             continue;
         if (!jsInstance->IsEvaluated())
@@ -154,7 +147,7 @@ void JavascriptModule::DumpScriptInfo()
             .arg(dump["Functions"], 3, 10, QLatin1Char('0')).arg(dump["QObjects"], 3, 10, QLatin1Char('0')).arg(dump["QObject methods"], 3, 10, QLatin1Char('0'))
             .arg(dump["Objects"], 3, 10, QLatin1Char('0'));
 
-        LogInfo(QString("Entity: %1 %2\n  { ").arg(ent->Id()).arg(ent->Name()) + dumpStr + " }");
+        LogInfo(scripts[i]->ParentEntity()->ToString() + " { " + dumpStr + " }");
     }
 }
 
@@ -329,23 +322,14 @@ EC_Script* JavascriptModule::FindScriptApplication(EC_Script* instance, const QS
     if (!scene)
         return 0;
     // Get all script components that possibly refer to this application
-    EntityList entities = scene->GetEntitiesWithComponent(EC_Script::TypeNameStatic());
-    for (EntityList::iterator i = entities.begin(); i != entities.end(); ++i)
+    std::vector<shared_ptr<EC_Script> > scripts = scene->Components<EC_Script>();
+    for(unsigned i = 0; i < scripts.size(); ++i)
     {
-        Entity* entity = i->get();
-        Entity::ComponentVector comps = entity->GetComponents(EC_Script::TypeNameStatic());
-        for (unsigned j = 0; j < comps.size(); ++j)
-        {
-            EC_Script* app = dynamic_cast<EC_Script*>(comps[j].get());
-            if (app)
-            {
-                const QString& name = app->applicationName.Get();
-                if (!name.isEmpty() && !name.trimmed().compare(appName, Qt::CaseInsensitive))
-                    return app;
-            }
-        }
+        const QString& name = scripts[i]->applicationName.Get();
+        if (!name.isEmpty() && !name.trimmed().compare(appName, Qt::CaseInsensitive))
+            return scripts[i].get();
     }
-    
+
     return 0;
 }
 
@@ -493,22 +477,14 @@ void JavascriptModule::CreateScriptObjects(EC_Script* app)
         return;
     QString appName, className;
     // Get all script components that possibly refer to this application
-    EntityList entities = scene->GetEntitiesWithComponent(EC_Script::TypeNameStatic());
-    for (EntityList::iterator i = entities.begin(); i != entities.end(); ++i)
-    {
-        Entity* entity = i->get();
-        Entity::ComponentVector comps = entity->GetComponents(EC_Script::TypeNameStatic());
-        for (unsigned j = 0; j < comps.size(); ++j)
+    std::vector<shared_ptr<EC_Script> > scripts = scene->Components<EC_Script>();
+    for(unsigned i = 0; i < scripts.size(); ++i)
+        if (scripts[i]->ShouldRun())
         {
-            EC_Script* script = dynamic_cast<EC_Script*>(comps[j].get());
-            if (script && script->ShouldRun())
-            {
-                ParseAppAndClassName(script, appName, className);
-                if (appName == thisAppName)
-                    CreateScriptObject(app, script, className);
-            }
+            ParseAppAndClassName(scripts[i].get(), appName, className);
+            if (appName == thisAppName)
+                CreateScriptObject(app, scripts[i].get(), className);
         }
-    }
 }
 
 void JavascriptModule::RemoveScriptObjects(JavascriptInstance* jsInstance)
@@ -588,7 +564,7 @@ void JavascriptModule::LoadStartupScripts()
 {
     UnloadStartupScripts();
 
-    QString path = Application::InstallationDirectory() + "jsmodules/startup";
+    QString path = QDir::fromNativeSeparators(Application::InstallationDirectory()) + "jsmodules/startup";
     QStringList scripts;
     foreach(const QString &file, DirectorySearch(path, false, QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks))
     if (file.endsWith(".js", Qt::CaseInsensitive))
@@ -600,24 +576,30 @@ void JavascriptModule::LoadStartupScripts()
     LogInfo(Name() + ": Loading startup scripts from /jsmodules/startup");
     if (scripts.empty())
         LogInfo(Name() + ": ** No scripts in /jsmodules/startup");
-
-    for(int i = 0; i < scripts.size(); ++i)
+    else
     {
-        QString startupScript = scripts[i];
-        startupScript = startupScript.replace("\\", "/");
-        QString baseName = startupScript.mid(startupScript.lastIndexOf("/")+1);
-        if (startupScriptsToLoad.contains(startupScript) || startupScriptsToLoad.contains(baseName))
+        QStringList scriptsToBeRemoved;
+        foreach (QString script, startupScriptsToLoad)
         {
-            LogInfo(Name() + ": ** " + baseName);
-            JavascriptInstance* jsInstance = new JavascriptInstance(startupScript, this);
-            PrepareScriptInstance(jsInstance);
-            startupScripts_.push_back(jsInstance);
-            jsInstance->Run();
+            QString fullPath = path + "/" + script;
+            if (scripts.contains(fullPath) || scripts.contains(script))
+            {
+                LogInfo(Name() + ": ** " + script);
+                JavascriptInstance* jsInstance = new JavascriptInstance(fullPath, this);
+                PrepareScriptInstance(jsInstance);
+                startupScripts_.push_back(jsInstance);
+                jsInstance->Run();
 
-            // Remove from the list so we can check relative paths next.
-            startupScriptsToLoad.removeAll(startupScript);
-            startupScriptsToLoad.removeAll(baseName);
+                scriptsToBeRemoved << fullPath;
+                scriptsToBeRemoved << script;
+            }
         }
+
+        if (scriptsToBeRemoved.empty())
+            LogInfo(Name() + ": ** No startup scripts were specified in config file");
+        else
+            foreach (QString script, scriptsToBeRemoved)
+                startupScriptsToLoad.removeAll(script);
     }
 
     LogInfo(Name() + ": Loading scripts from startup config");

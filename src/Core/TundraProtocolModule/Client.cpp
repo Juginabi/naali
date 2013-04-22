@@ -12,7 +12,12 @@
 #include "MsgLoginReply.h"
 #include "MsgClientJoined.h"
 #include "MsgClientLeft.h"
+#include "MsgCameraOrientationRequest.h"
 #include "UserConnectedResponseData.h"
+#include "EC_Placeable.h"
+#include "Entity.h"
+#include "Renderer.h"
+#include "OgreRenderingModule.h"
 
 #include "LoggingFunctions.h"
 #include "CoreStringUtils.h"
@@ -35,6 +40,9 @@ Client::Client(TundraLogicModule* owner) :
     framework_(owner->GetFramework()),
     loginstate_(NotConnected),
     reconnect_(false),
+    cameraUpdateTimer(0),
+    sendCameraUpdates_(false),
+    firstCameraUpdateSent_(false),
     client_id_(0),
     discScene("")
 {
@@ -90,7 +98,7 @@ void Client::Login(const QUrl& loginUrl)
     QString address = loginUrl.host();
     int port = loginUrl.port();
 
-    // If the username is more exotic or has spaces, prefer
+    // If the username is more exotic or has spaces, prefer 
     // decoding the percent encoding before it is sent to the server.
     QByteArray utfUsername = loginUrl.queryItemValue("username").toUtf8();
     if (utfUsername.contains('%'))
@@ -155,9 +163,9 @@ void Client::Login(const QString& address, unsigned short port, kNet::SocketTran
     SetLoginProperty("client-organization", Application::OrganizationName());
 
     KristalliProtocolModule *kristalli = framework_->GetModule<KristalliProtocolModule>();
-    connect(kristalli, SIGNAL(NetworkMessageReceived(kNet::MessageConnection *, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)),
+    connect(kristalli, SIGNAL(NetworkMessageReceived(kNet::MessageConnection *, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)), 
             this, SLOT(HandleKristalliMessage(kNet::MessageConnection*, kNet::packet_id_t, kNet::message_id_t, const char*, size_t)), Qt::UniqueConnection);
-    connect(kristalli, SIGNAL(ConnectionAttemptFailed(QString&)), this, SLOT(OnConnectionAttemptFailed(QString&)), Qt::UniqueConnection);
+    connect(kristalli, SIGNAL(ConnectionAttemptFailed()), this, SLOT(OnConnectionAttemptFailed()), Qt::UniqueConnection);
 
     owner_->GetKristalliModule()->Connect(address.toStdString().c_str(), port, protocol);
 
@@ -170,6 +178,7 @@ void Client::Login(const QString& address, unsigned short port, kNet::SocketTran
 
     // Save clientId, reconnect, loginstate etc
     SaveProperties(sceneName);
+    firstCameraUpdateSent_ = false;
 }
 
 void Client::Logout(const QString &name)
@@ -395,26 +404,26 @@ void Client::HandleKristalliMessage(MessageConnection* source, packet_id_t packe
             return;
         }
     }
-
+    
     switch(messageId)
     {
     case MsgLoginReply::messageID:
-    {
-        MsgLoginReply msg(data, numBytes);
-        HandleLoginReply(source, msg);
-    }
+        {
+            MsgLoginReply msg(data, numBytes);
+            HandleLoginReply(source, msg);
+        }
         break;
     case MsgClientJoined::messageID:
-    {
-        MsgClientJoined msg(data, numBytes);
-        HandleClientJoined(source, msg);
-    }
+        {
+            MsgClientJoined msg(data, numBytes);
+            HandleClientJoined(source, msg);
+        }
         break;
     case MsgClientLeft::messageID:
-    {
-        MsgClientLeft msg(data, numBytes);
-        HandleClientLeft(source, msg);
-    }
+        {
+            MsgClientLeft msg(data, numBytes);
+            HandleClientLeft(source, msg);
+        }
         break;
     }
     emit NetworkMessageReceived(packetId, messageId, data, numBytes);
@@ -433,12 +442,6 @@ void Client::HandleLoginReply(MessageConnection* source, const MsgLoginReply& ms
         // Note: create scene & send info of login success only on first connection, not on reconnect
         if (!reconnect_list_[sceneName])
         {
-            ::LogInfo("Handle connection!");
-            // This sets identifier in KristalliProtocolModule for this particular connection
-            // This is kinda ugly way to do this because this requires us to signal data back the
-            // messaging chain in order to keep track of connection lists.
-            //owner_->GetKristalliModule()->SetIdentifier(sceneName);
-
             // Create a non-authoritative scene for the client
             ScenePtr scene = framework_->Scene()->CreateScene(sceneName, true, false);
             

@@ -10,7 +10,11 @@
 #include <kNet/Socket.h>
 #include <map>
 #include <QObject>
+#include <QUrl>
 #include <QMap>
+#include "Math/Quat.h"
+#include "Math/float3.h"
+#include <QTimer>
 
 class Framework;
 
@@ -66,7 +70,7 @@ public slots:
     /// Connects and logs in.
     /** loginUrl's query parameters will be evaluated for the login data.
         All query parameters that are not recognized will be added to the clients login properties as custom data.
-        Minimum information needed to try a connection in the url are host and username. For query parameters only username, protocol and password
+        Minimum information needed to try a connection in the url are host and username. For query parameters only username, protocol and password 
         get special treatment, other params are inserted to the login properties as is.
         URL syntax: {tundra|http|https}://host[:port]/?username=x[&password=y][&protocol={udp|tcp}][&XXX=YYY]
         URL examples: tundra://server.com/?username=John%20Doe tundra://server.com:5432/?username=John%20Doe&password=pWd123&protocol=udp&myCustomValue=YYY&myOtherValue=ZZZ
@@ -125,7 +129,7 @@ public slots:
 signals:
     /// This signal is emitted right before this client is starting to connect to a Tundra server.
     /** Any script or other piece of code can listen to this signal, and as at this point, fill in any internal
-        custom data (called "login properties") they need to add to the connection handshake. The server will get
+        custom data (called "login properties") they need to add to the connection handshake. The server will get 
         all the login properties and a server-side script can do validation and storage of whether the client
         can be authorized to log in or not. */
     void AboutToConnect();
@@ -162,6 +166,9 @@ private:
     /// Removes connection properties from containers
     void RemoveProperties(const QString &name);
 
+    /// Send camera orientation to the server
+    void SendCameraOrientation(kNet::DataSerializer ds, kNet::NetworkMessage *msg);
+
     /// Handles pending login to server
     void CheckLogin();
 
@@ -191,6 +198,15 @@ private:
     QMap<QString, u8> client_id_list_;
     // Scene to be disconnected
     QString discScene;
+
+    QTimer *cameraUpdateTimer;
+    // Current camera orientation
+    Quat currentcameraorientation_;
+    // Current camera location
+    float3 currentcameralocation_;
+    // Variable controlling whether or not to send camera orientation updates
+    bool sendCameraUpdates_;
+    bool firstCameraUpdateSent_;
 };
 
 }
