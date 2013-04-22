@@ -165,7 +165,7 @@ void Client::Login(const QString& address, unsigned short port, kNet::SocketTran
     KristalliProtocolModule *kristalli = framework_->GetModule<KristalliProtocolModule>();
     connect(kristalli, SIGNAL(NetworkMessageReceived(kNet::MessageConnection *, kNet::packet_id_t, kNet::message_id_t, const char *, size_t)), 
             this, SLOT(HandleKristalliMessage(kNet::MessageConnection*, kNet::packet_id_t, kNet::message_id_t, const char*, size_t)), Qt::UniqueConnection);
-    connect(kristalli, SIGNAL(ConnectionAttemptFailed()), this, SLOT(OnConnectionAttemptFailed()), Qt::UniqueConnection);
+    connect(kristalli, SIGNAL(ConnectionAttemptFailed(QString&)), this, SLOT(OnConnectionAttemptFailed(QString&)), Qt::UniqueConnection);
 
     owner_->GetKristalliModule()->Connect(address.toStdString().c_str(), port, protocol);
 

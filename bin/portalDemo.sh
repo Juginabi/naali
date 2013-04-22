@@ -14,7 +14,7 @@ bashtrapKillTerm()
 }
     trap bashtrapKillTerm INT TERM KILL
     trap bashtrapExit EXIT
-    cd /home/jukka/src/rex-juginabi/bin
+    cd /home/jukka/src/Portals/bin
     
     # Start servers.
     gnome-terminal -x ./Tundra --server --file scenes/portalscene/portalScene.txml --port 2345 --headless &
@@ -25,7 +25,7 @@ bashtrapKillTerm()
     sleep 1
     gnome-terminal -x ./Tundra --server --file scenes/Outdoor/outdoorspace.txml --port 2348 --headless &
     sleep 1
-    gnome-terminal -x ./Tundra --server --file scenes/Oulu3D-Low/scene.txml --port 2349 --headless &
+    gnome-terminal -x ./Tundra --server --file scenes/Oulu3D/scene-rigid-floor.txml --port 2349 --headless &
     sleep 1
     # Start viewer with valgrind tool memcheck.
     ./Tundra --client --storage scenes/ --connect "127.0.0.1;2345;;;" --config viewer-portals.xml --nocentralwidget --fullscreen

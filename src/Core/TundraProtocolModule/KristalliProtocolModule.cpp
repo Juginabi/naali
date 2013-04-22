@@ -89,7 +89,6 @@ static const int cReconnectAttempts = 5;
 
 KristalliProtocolModule::KristalliProtocolModule() :
     IModule("KristalliProtocol"),
-    serverConnection(0),
     server(0),
     reconnectAttempts(0),
     connectionPending(false)
@@ -197,9 +196,6 @@ void KristalliProtocolModule::Update(f64 /*frametime*/)
             if (serverConnectionIter_.value() && !serverConnectionIter_.value()->IsReadOpen() && serverConnectionIter_.value()->IsWriteOpen())
                 serverConnectionIter_.value()->Disconnect(0);
 
-            // ::LogInfo("serverConnection: " + ToString(!!serverConnection));
-            // if (serverConnection)
-            //   ::LogInfo("state: " + ToString(serverConnection->GetConnectionState()));
             if ((!serverConnectionIter_.value() || serverConnectionIter_.value()->GetConnectionState() == ConnectionClosed ||
                  serverConnectionIter_.value()->GetConnectionState() == ConnectionPending) && serverIpIter_.value().length() != 0)
             {
@@ -228,15 +224,6 @@ void KristalliProtocolModule::Update(f64 /*frametime*/)
         }
     }
 
-    // Note: Calling the above serverConnection->Process() may set serverConnection to null if the connection gets disconnected.
-    // Therefore, in the code below, we cannot assume serverConnection is non-null, and must check it again.
-
-    // Our client->server connection is never kept half-open.
-    // That is, at the moment the server write-closes the connection, we also write-close the connection.
-    // Check here if the server has write-closed, and also write-close our end if so.
-    if (serverConnection && !serverConnection->IsReadOpen() && serverConnection->IsWriteOpen())
-        serverConnection->Disconnect(0);
-    
     // Process server incoming connections & messages if server up
     if (server)
     {
@@ -257,6 +244,7 @@ void KristalliProtocolModule::Update(f64 /*frametime*/)
 void KristalliProtocolModule::Connect(const char *ip, unsigned short port, SocketTransportLayer transport)
 {
     // Build identifier for this connection attempt.
+    Ptr(kNet::MessageConnection) serverConnection;
     connectionID.clear();
     connectionID.append(QString::fromAscii(ip)+"-"+QString::number(port));
     transport == SocketOverUDP ? connectionID.append("-udp") : connectionID.append("-tcp");

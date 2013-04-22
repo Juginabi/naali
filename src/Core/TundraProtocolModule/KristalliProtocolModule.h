@@ -55,8 +55,6 @@ public:
     /// Invoked by the Network library for disconnected client
     void ClientDisconnected(kNet::MessageConnection* source);
 
-    bool Connected() const { return serverConnection != 0; }
-
     void SubscribeToNetworkEvents();
 
     /// Return message connection, for use by other modules (null if no connection made)
@@ -110,6 +108,8 @@ private:
     int reconnectAttempts;
 
     void PerformConnection();
+
+    /// Handles reconnection attempt when disconnected from the server.
     void PerformReconnection(QMutableMapIterator<QString, Ptr(kNet::MessageConnection)> &, QString key);
 
     /// Allocate a  connection ID for new connection
@@ -120,7 +120,7 @@ private:
     bool connectionPending;
     
     kNet::Network network;
-    Ptr(kNet::MessageConnection) serverConnection;
+
     kNet::NetworkServer *server;
     
     /// Users that are connected to server
