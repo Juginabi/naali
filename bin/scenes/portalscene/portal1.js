@@ -186,6 +186,9 @@ Portal.prototype.disconnection = function(scene)
     if (scene == this.conname)
     {
         this.connected = false;
+        this.rtt = null;
+        this.me.mesh.SetMaterial(1, "portalMaterial.100.material");
+        this.me.mesh.meshRef = this.me.mesh.meshRef;
         client.Disconnected.disconnect(this, this.disconnection);
     }
 }
