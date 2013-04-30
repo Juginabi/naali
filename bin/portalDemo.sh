@@ -14,8 +14,23 @@ bashtrapKillTerm()
 }
     trap bashtrapKillTerm INT TERM KILL
     trap bashtrapExit EXIT
-    cd /home/jukka/src/Portals/bin
-    
+    cd scenes/
+
+# Check if portal demoscenario assets are already downloaded
+if test -f portalscene/assetsOK; then
+    echo "PortalScene assets seems to be in order.."
+else
+    if test -f PortalScenario-assets.zip; then
+        unzip PortalScenario-assets.zip
+    else
+        wget https://dl.dropboxusercontent.com/u/5680466/PortalScenario-assets/PortalScenario-assets.zip
+        unzip PortalScenario-assets.zip
+    fi
+    # Everything ok now. Set flag for next run that assets are OK.
+    touch portalscene/assetsOK
+fi
+
+    cd ..
     # Start servers.
     gnome-terminal -x ./Tundra --server --file scenes/portalscene/portalScene.txml --port 2345 --headless &
     sleep 1
@@ -27,7 +42,7 @@ bashtrapKillTerm()
     sleep 1
     gnome-terminal -x ./Tundra --server --file scenes/Oulu3D/scene-rigid-floor.txml --port 2349 --headless &
     sleep 1
-    # Start viewer with valgrind tool memcheck.
+    # Start viewer and connect to portal scene.
     ./Tundra --client --storage scenes/ --connect "127.0.0.1;2345;;;" --config viewer-portals.xml --nocentralwidget --fullscreen
     
     echo 'End of portal demo!'
